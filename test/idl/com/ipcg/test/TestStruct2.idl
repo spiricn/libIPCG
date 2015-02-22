@@ -1,0 +1,7 @@
+package com.ipcg.test;
+
+struct TestStruct2{
+	int32 field1;
+	int32 field2;
+	int32 field3;
+};
