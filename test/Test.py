@@ -2,10 +2,14 @@ from ipcg.binder.BinderGenerator import BinderGenerator
 
 
 def test():
+    out = 'Z:spiric/bytel/Lollipop/external/test'
+
+#     out = 'C:/Users/Nikola/Desktop/wavt'
+    
     generator = BinderGenerator(
-        'out/libTestIPCGNative',
+        out + '/libTestIPCGNative',
         'libTestIPCGNative',
-        'out/libTestIPCGJava',
+        out + '/libTestIPCGJava',
         'libTestIPCGJava',
     )
     
@@ -16,6 +20,8 @@ def test():
     print('generate')
     
     generator.generate()
+    
+    print('done')
 
 if __name__ == '__main__':
     test()

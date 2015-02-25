@@ -27,7 +27,7 @@ class Destination:
         return self._path
     
     def install(self, source, path):
-        self._parent._installSource(self, source, path)
+        return self._parent._installSource(self, source, path)
         
     @property
     def intermediates(self):

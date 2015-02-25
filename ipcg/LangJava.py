@@ -61,7 +61,7 @@ def getAIDLMethodArgList(context, args):
     res = ''
     
     for index, arg in enumerate(args):
-        if arg.type in [Type.STRUCTURE, Type.INTERFACE]:
+        if arg.type in [Type.STRUCTURE, Type.INTERFACE,Type.ENUM]:
             res += 'in' if arg.mod(Type.MOD_IN) else 'out' if arg.mod(Type.MOD_OUT) else 'inout'
             res += ' '
             
@@ -71,3 +71,10 @@ def getAIDLMethodArgList(context, args):
             res += ', '
             
     return res
+
+def getIncludePath(context, idlType, name=None):
+    path = idlType.module.package.path
+    path.append(idlType.name if not name else name)
+        
+    return '.'.join(path)
+

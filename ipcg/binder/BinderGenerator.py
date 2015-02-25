@@ -1,12 +1,22 @@
+import os
+
 from idl.Environment import Environment
 from idl.Type import Type
 
 from ipcg.binder.JavaGenerator import JavaGenerator
 from ipcg.binder.NativeGenerator import NativeGenerator
-import os
+from ipcg.installer.Installer import Installer
 
 
 class BinderGenerator:
+    EXTENSION_JAVA = 'java'
+    
+    EXTENSION_NATIVE_SOURCE = 'cpp'
+    
+    EXTENSION_NATIVE_HEADER = 'h'
+    
+    EXTENSION_AIDL = 'aidl'
+    
     def __init__(self, nativeProjDir, nativeLibraryName, javaProjDir, javaLibraryName):
         self._java = JavaGenerator()
         
@@ -18,25 +28,29 @@ class BinderGenerator:
         
         self._env = Environment()
         
-        self._nativeProjDir = os.path.abspath(nativeProjDir)
-        
-        self._javaProjDir = os.path.abspath(javaProjDir)
-    
         self._nativeSourceFiles = []
         
         self._javaSourceFiles = []
     
+        self._installer = Installer()
+        
+        self._nativeProj = self._installer.addDestination('native', nativeProjDir)
+        
+        self._javaProj = self._installer.addDestination('java', javaProjDir) 
+        
     @property
     def env(self):
         return self._env
     
     def generate(self):
+        self._installer.begin()
+        
         for idlType in self._env.types:
             if idlType.id in [Type.ENUM, Type.STRUCTURE]:
                 # Java AIDL                    
-                self._installJavaSource(
-                    '/'.join(idlType.path) + '.aidl',
-                    self._java.generateParcelableAIDL(idlType)
+                self._installJava(
+                    self._java.generateParcelableAIDL(idlType),
+                    self._getFilePath(idlType.module.package, idlType.name + '.aidl')
                 )
                 
                 # Java parcelable function
@@ -46,10 +60,10 @@ class BinderGenerator:
                 }[idlType.id]
                 
                 # Java parcelable
-                self._installJavaSource(
-                    '/'.join(idlType.path) + '.java',
+                self._installJava(
                     javaParcelableFnc(idlType),
-                    make=True
+                    self._getFilePath(idlType.module.package, idlType.name + '.java'),
+                    addToMakeFile=True
                 )
                 
                 # Native header function
@@ -59,64 +73,51 @@ class BinderGenerator:
                 }[idlType.id]
                 
                 # Native header
-                self._installNativeHeader(
-                    '/'.join(idlType.path),
-                    nativeHeaderFnc(idlType)
+                self._installNative(
+                    nativeHeaderFnc(idlType),
+                    self._getFilePath(idlType.module.package, idlType.name) + '.h'
                 )
                 
                 if idlType == Type.STRUCTURE:
                     # Native source
-                    self._installNativeSource(
-                        '/'.join(idlType.path),
-                        self._native.generateStructParcelableSource(idlType)
+                    self._installNative(
+                        self._native.generateStructParcelableSource(idlType),
+                        self._getFilePath(idlType.module.package, idlType.name) + '.cpp',
+                        addToMakeFile=True
                     )
 
             elif idlType == Type.INTERFACE:
                 # AIDL
-                self._installJavaSource(
-                    '/'.join(idlType.path) + '.aidl',
+                self._installJava(
                     self._java.generateInterfaceAIDL(idlType),
-                    make=True
+                    self._getFilePath(idlType.module.package, idlType.name + '.aidl'),
+                    addToMakeFile=True
                 )
                 
                 # Native header
-                path = idlType.path
-                
-                path[-1] = 'I' + path[-1]
-                
-                self._installNativeHeader(
-                    '/'.join(path),
-                    self._native.generateInterfaceHeader(idlType)
+                self._installNative(
+                    self._native.generateInterfaceHeader(idlType),
+                    self._getFilePath(idlType.module.package, 'I' + idlType.name) + '.h'
                 )
                 
                 # Native Bn header
-                path = idlType.path
-                
-                path[-1] = 'Bn' + path[-1]
-                
-                self._installNativeHeader(
-                    '/'.join(path),
-                    self._native.generateInterfaceBnHeader(idlType)
+                self._installNative(
+                    self._native.generateInterfaceBnHeader(idlType),
+                    self._getFilePath(idlType.module.package, 'Bn' + idlType.name) + '.h'
                 )
                 
                 # Native Bn source
-                path = idlType.path
-                
-                path[-1] = 'Bn' + path[-1]
-                
-                self._installNativeSource(
-                  '/'.join(path),
-                    self._native.generateInterfaceBnSource(idlType)
+                self._installNative(
+                    self._native.generateInterfaceBnSource(idlType),
+                    self._getFilePath(idlType.module.package, 'Bn' + idlType.name) + '.cpp',
+                    addToMakeFile=True
                 )
                 
                 # Native Bp source
-                path = idlType.path
-                
-                path[-1] = 'Bp' + path[-1]
-                
-                self._installNativeSource(
-                    '/'.join(path),
-                    self._native.generateInterfaceBpSource(idlType)
+                self._installNative(
+                    self._native.generateInterfaceBpSource(idlType),
+                    self._getFilePath(idlType.module.package, 'Bp' + idlType.name) + '.cpp',
+                    addToMakeFile=True
                 )      
             
             else:
@@ -124,63 +125,32 @@ class BinderGenerator:
             
         # Java makefile
         self._installJava(
-            'Android.mk',
-            self._java.generateMakefile(self._javaLibraryName, self._javaSourceFiles)
+            self._java.generateMakefile(self._javaLibraryName, self._javaSourceFiles),
+            'Android.mk'
         )
         
         # Native makefile
         self._installNative(
-            'Android.mk',
-            self._native.generateMakefile(self._nativeSourceFiles, self._nativeLibraryName)
+            self._native.generateMakefile(self._nativeSourceFiles, self._nativeLibraryName),
+            'Android.mk'
         )
-                
-    def _installNativeSource(self, path, source):
-        # Append extension & source directory
-        path = os.path.join('source', path + '.cpp')
         
-        # Replace possible windows path delimiters with unix ones
-        path = path.replace('\\', '/')
+        result = self._installer.commit()
         
-        self._nativeSourceFiles.append(path)
+        print('%d files installed ( %d up-to-date )' % (result.numFilesInstalled, result.numFilesUpToDate))
         
-        self._installNative(path, source)
-            
-    def _installNativeHeader(self, path, source):
-        path += '.h'
+    def _getFilePath(self, package, name):
+        return '/'.join(package.path) + '/' + name
         
-        self._installNative(os.path.join('include', path), source)
-    
-    def _installNative(self, path, source):
-        print('[native] install %r' % path)
-        fullPath = os.path.join(self._nativeProjDir, path)
+    def _installJava(self, source, path, addToMakeFile=False):
+        self._javaProj.install(source, path)
         
-        dirPath = os.path.dirname(fullPath )
-        
-        if dirPath and not os.path.exists(dirPath):
-            os.makedirs(dirPath)
-            
-        open(fullPath , 'wb').write(bytes(source, 'UTF-8'))
-    
-    
-    def _installJavaSource(self, path, source, make=False):
-        path = os.path.join('src', path)
-        
-        # Replace possible windows path delimiters with unix ones
-        path = path.replace('\\', '/') 
-        
-        self._installJava(path, source)
-        
-        if make:
+        if addToMakeFile:
             self._javaSourceFiles.append(path)
+
+    def _installNative(self, source, path, addToMakeFile=False):
+        self._nativeProj.install(source, path)
         
-    def _installJava(self, path, source):
-        print('[java] install %r' % path)
-        
-        fullPath = os.path.join(self._javaProjDir, path)
-        
-        dirPath = os.path.dirname(fullPath )
-        
-        if not os.path.exists(dirPath):
-            os.makedirs(dirPath)
-            
-        open(fullPath, 'wb').write(bytes(source, 'UTF-8'))
+        if addToMakeFile:
+            self._nativeSourceFiles.append(path)
+

@@ -15,4 +15,4 @@ class Intermediate:
         return self._dest
     
     def install(self):
-        FileUtils.installFile(self._source, self._dest)
+        return FileUtils.installFile(self._source, self._dest)

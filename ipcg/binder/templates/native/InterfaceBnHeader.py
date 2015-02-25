@@ -8,16 +8,9 @@ className = 'Bn' + iface.name
 interfaceClassName = 'I' + iface.name
 
 headerGuard = className.upper() + '_H'
-
-interfaceClassInclude = iface.path
-
-interfaceClassInclude[-1] = 'I' + interfaceClassInclude[-1]
-
-interfaceClassInclude = '/'.join(interfaceClassInclude) + '.h'
-
 %>
 
-#include "${interfaceClassInclude}"
+#include "${Lang.getIncludePath(iface)}"
 
 namespace ${namespace} {
 

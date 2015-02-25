@@ -1,4 +1,5 @@
-package com.example.test;
+package ${'.'.join(enum.module.package.path)};
+
 
 <%namespace name="LangJava" module="ipcg.LangJava"/>
 
@@ -40,6 +41,10 @@ public enum ${enum.name} implements Parcelable {
         dest.writeInt(ordinal());
     }
     
+    public ${enum.name} readFromParcel(Parcel in) {
+        return values()[in.readInt()];
+    }
+     
     public static final Parcelable.Creator<${enum.name}> CREATOR = new Parcelable.Creator<${enum.name}>() {
         public ${enum.name} createFromParcel(Parcel in) {
             return ${enum.name}.values()[in.readInt()];

@@ -141,10 +141,11 @@ def getWriteExpr(context, varName, varType, parcelName):
     else:
         return '#error Deserialization of type ' + varType.name + ' not implemented'
     
-def getIncludePath(context, idlType):
-    path = idlType.path
+def getIncludePath(context, idlType, name=None):
+    path = idlType.module.package.path
+    path.append(idlType.name if not name else name)
     
-    if idlType == Type.INTERFACE:
+    if idlType == Type.INTERFACE and not name:
         path[-1] = 'I' + path[-1]
         
     return '/'.join(path) + '.h'

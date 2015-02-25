@@ -7,13 +7,18 @@ from ipcg.installer.FileUtils import FileUtils
 
 
 class Installer:
+    class Statistics:
+        def __init__(self, installed, upToDate):
+            self.numFilesInstalled = installed
+            self.numFilesUpToDate = upToDate
+            
     STATE_IDLE, \
     STATE_TRANSACTION, \
      = range(2)
      
     BUILD_LIST_FILE_NAME = 'build_list'
     
-    def __init__(self, buildDir):
+    def __init__(self, buildDir='.build'):
         self._destinations = {}
         
         self._buildDir = os.path.abspath(buildDir)
@@ -38,7 +43,7 @@ class Installer:
         if self._state != Installer.STATE_TRANSACTION:
             raise RuntimeError('Transaction must be active to install a file')
         
-        FileUtils.installSource(source, os.path.join(dest.intermediatesDir, path))
+        return FileUtils.installSource(source, os.path.join(dest.intermediatesDir, path))
         
     @property
     def buildDir(self):
@@ -88,6 +93,9 @@ class Installer:
         if self._state != Installer.STATE_TRANSACTION:
             raise RuntimeError('Must call begin() before claling commit()')
         
+        numInstalled = 0
+        numUpToDate = 0
+        
         # Load old build list
         oldBuildList = self._readBuildList()
         
@@ -95,7 +103,10 @@ class Installer:
         
         for name, dest in self._destinations.items():
             for i in dest.intermediates:
-                i.install()
+                if i.install():
+                    numInstalled += 1
+                else:
+                    numUpToDate += 1
                 
                 buildList.append(i.dest)
 
@@ -111,3 +122,6 @@ class Installer:
             pickle.dump(buildList, fileObj)
             
         self._state = Installer.STATE_IDLE
+        
+        return Installer.Statistics(numInstalled, numUpToDate)
+

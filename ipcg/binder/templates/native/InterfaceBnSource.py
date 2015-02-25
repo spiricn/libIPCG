@@ -11,17 +11,12 @@ headerGuard = className.upper() + '_H'
 
 methodResult = '__methodResult'
 
-includePath = iface.path
-
-includePath[-1] = 'Bn' + includePath[-1]
-
-includePath = '/'.join(includePath) + '.h'
 %>
 
 #include <binder/IInterface.h>
 #include <binder/Parcel.h>
 
-#include "${includePath}"
+#include "${Lang.getIncludePath(iface, 'Bn' + iface.name)}"
 
 #ifdef LOG_TAG
 #undef LOG_TAG

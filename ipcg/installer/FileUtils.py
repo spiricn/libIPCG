@@ -32,13 +32,16 @@ class FileUtils:
         if os.path.exists(destination) and FileUtils.compare(source, destination):
             # No need to install (files already same)
             print('File up-to-date %r' % source)
-            return
+            return False
             
         FileUtils.makeTree(os.path.dirname(destination))
         
         FileUtils.copy(source, destination)
 
         print('Install file %r' % destination)
+        
+        return True
+    
     @staticmethod
     def delete(path):
         os.remove(path)
@@ -57,6 +60,8 @@ class FileUtils:
         
         with open(fullPath, 'wb') as fileObj:
             fileObj.write(bytes(source, 'UTF-8'))
+            
+        return True
             
     @staticmethod
     def makeTree(path):

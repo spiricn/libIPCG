@@ -1,4 +1,4 @@
-package com.example.test;
+package ${'.'.join(struct.module.package.path)};
 
 <%namespace name="LangJava" module="ipcg.LangJava"/>
 
