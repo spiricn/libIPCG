@@ -2,16 +2,6 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_CFLAGS += -DANDROID_BUILD=1
-
-ifeq "$(KITKAT)" "YES"
-LOCAL_CFLAGS += -DKITKAT
-endif
-
-ifeq "$(LOLLIPOP)" "YES"
-LOCAL_CFLAGS += -DLOLLIPOP
-endif
-
 LOCAL_SRC_FILES += \
 % for file in sourceFiles:
     ${file} \

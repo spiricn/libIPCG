@@ -31,6 +31,10 @@ public enum ${enum.name} implements Parcelable {
         return mValue;
     }
     
+    static ${enum.name} getFromValue(itn value){
+        // TODO
+    }
+    
     @Override
     public int describeContents() {
         return 0;

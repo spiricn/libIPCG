@@ -1,11 +1,12 @@
-<%namespace name="Lang" module="ipcg.LangCPP"/>
+<%!
+import ipcg.LangCPP as Lang
+%>
+
 
 <%
 from idl.Type import Type
 
-className = 'Bn' + iface.name
-
-interfaceClassName = 'I' + iface.name
+className = 'Bn' + iface.name[1:]
 
 headerGuard = className.upper() + '_H'
 
@@ -16,7 +17,7 @@ methodResult = '__methodResult'
 #include <binder/IInterface.h>
 #include <binder/Parcel.h>
 
-#include "${Lang.getIncludePath(iface, 'Bn' + iface.name)}"
+#include "${Lang.getIncludePath(iface, 'Bn' + iface.name[1:])}"
 
 #ifdef LOG_TAG
 #undef LOG_TAG
@@ -26,7 +27,7 @@ methodResult = '__methodResult'
 
 using namespace android;
 
-namespace ${namespace} {
+${Lang.namespaceStart(iface.path[:-1])}
 
 status_t ${className}::onTransact(uint32_t code, const android::Parcel& data, android::Parcel* reply, uint32_t flags){
     switch(code){
@@ -38,13 +39,13 @@ status_t ${className}::onTransact(uint32_t code, const android::Parcel& data, an
             
             // Declare method arguments
         % for arg in method.args:
-            ${Lang.getTypeName(arg.type)} ${arg.name} = ${Lang.getInvalidValue(arg.type)};
+            ${Lang.getTypeName(arg.type)} ${arg.name} = ${Lang.getDefaultValue(arg.type)};
         % endfor
             
             // Declare return type
             
             % if method.ret.type != Type.VOID:
-            ${Lang.getTypeName(method.ret.type)} ${methodResult} = ${Lang.getInvalidValue(method.ret.type)};
+            ${Lang.getTypeName(method.ret.type)} ${methodResult} = ${Lang.getDefaultValue(method.ret.type)};
             % endif
             
             // Deserialize arguments
@@ -99,4 +100,5 @@ ${className}::${className}(){
 ${className}::~${className}(){
 }
 
-}; // ${namespace}
+${Lang.namespaceEnd(iface.path[:-1])}
+

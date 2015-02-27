@@ -1,8 +1,8 @@
-<%namespace name="Lang" module="ipcg.LangCPP"/>
-
 <%
 
 from idl.Type import Type
+
+import ipcg.LangCPP as Lang
 
 %>
 
@@ -18,13 +18,32 @@ from idl.Type import Type
 
 using namespace android;
 
-namespace ${namespace} {
+${Lang.namespaceStart(struct.path[:-1])}
 
 // Constructor
 ${struct.name}::${struct.name}(){
     // Member initialization
 % for field in struct.fields:
-    this->${field.name} = ${Lang.getInvalidValue(field.type)};
+    this->${field.name} = ${Lang.getDefaultValue(field.type)};
+% endfor
+}
+
+// Copy constructor
+${struct.name}::${struct.name}(const ${struct.name}& other){
+                                                            
+% for field in struct.fields:
+    % if field.type.isPrimitive or field.type == Type.ENUM:
+        this->${field.name} = other.${field.name};
+    % elif field.type == Type.STRUCTURE:
+        if(other.${field.name}.get()){
+            this->${field.name} = new ${Lang.getTypeClass(field.type)}(*other.${field.name}.get());
+        }
+        else{
+             this->${field.name} = NULL;
+        }
+    % else:
+    #error Field '${field.type.name}' type copy not supported
+    % endif
 % endfor
 }
 
@@ -33,7 +52,7 @@ ${struct.name}::~${struct.name}(){
 }
 
 // Deserialization
-sp<${struct.name}> ${struct.name}::readFromParcel(const Parcel &data){
+sp<${struct.name}> ${struct.name}::readFromParcel(const Parcel& data){
     // Check if there is valid data in the parcel
     if(data.readInt32() == 0){
         // No data
@@ -63,16 +82,47 @@ status_t ${struct.name}::writeToParcel(Parcel* data) const{
 
 // Field getters
 % for field in struct.fields:
-${Lang.getTypeName(field.type)} ${struct.name}::get${field.name}() const{
+${Lang.getTypeName(field.type)} ${struct.name}::${Lang.formatGetter(field)}() const{
     return this->${field.name};
 }
 % endfor
 
 // Field setters
 % for field in struct.fields:
-void ${struct.name}::set${field.name}(const ${Lang.getTypeName(field.type)}& value){
+${struct.name}* ${struct.name}::${Lang.formatSetter(field)}(const ${Lang.getTypeName(field.type)}& value){
     this->${field.name} = value;
+    
+    return this;
 }
 % endfor
 
-}; // namespace ${namespace}
+bool ${struct.name}::operator==(const ${Lang.getTypeClass(struct)}& other) const{
+                                                                                                                                             
+% for field in struct.fields:
+    % if field.type.isPrimitive or field.type == Type.ENUM:
+        if(this->${field.name} != other.${field.name}){
+            return false;
+        }
+    % elif field.type == Type.STRUCTURE:
+        if(this->${field.name}.get() && other.${field.name}.get()){
+            if(*this->${field.name}.get() != *other.${field.name}.get()){
+                return false;
+            }
+        }
+        else if(this->${field.name}.get() != other.${field.name}.get()){
+             return false;
+        }
+    % else:
+    #error Field '${field.type.name}' type copy not supported
+    % endif
+% endfor
+
+    return true;
+}
+
+
+bool ${struct.name}::operator!=(const ${Lang.getTypeClass(struct)}& other) const{
+    return !(*this == other);
+}
+
+${Lang.namespaceEnd(struct.path[:-1])}

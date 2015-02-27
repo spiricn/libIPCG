@@ -2,9 +2,9 @@ from ipcg.binder.BinderGenerator import BinderGenerator
 
 
 def test():
-    out = 'Z:spiric/bytel/Lollipop/external/test'
+    out = 'D:/home/dev/workspace/testIPCG'
 
-#     out = 'C:/Users/Nikola/Desktop/wavt'
+#     out = 'out'
     
     generator = BinderGenerator(
         out + '/libTestIPCGNative',

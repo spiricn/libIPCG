@@ -1,6 +1,6 @@
 import re
 
-def nameToDefine(context, name):
+def nameToDefine(name):
     res = ''
     
     for word in re.findall('[A-Z][a-z]*', name):

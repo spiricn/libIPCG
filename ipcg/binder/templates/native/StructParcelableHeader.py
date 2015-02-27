@@ -1,4 +1,8 @@
-<%namespace name="Lang" module="ipcg.LangCPP"/>
+<%!
+import ipcg.LangCPP as Lang
+import ipcg.Utils as Utils
+%>
+
 
 <%
 
@@ -16,31 +20,38 @@ headerGuard = struct.name.upper() + '_H'
 % endfor
 #include <binder/Parcel.h>
 
-namespace ${namespace} {
+${Lang.namespaceStart(struct.path[:-1])}
                  
 class ${struct.name} : public android::LightRefBase<${struct.name}> {
 public:
     // Default constructor
     ${struct.name}();
     
+    // Copy constructor
+    ${struct.name}(const ${struct.name}& other);
+    
     // Destructor
     virtual ~${struct.name}();
     
     // Object deserialization
-    static android::sp<${struct.name}> readFromParcel(const android::Parcel &data);
+    static android::sp<${struct.name}> readFromParcel(const android::Parcel& data);
 
     // Object serialization
     android::status_t writeToParcel(android::Parcel* data) const;
     
     // Field getters
 % for field in struct.fields:
-    ${Lang.getTypeName(field.type)} get${field.name}() const;
+    ${Lang.getTypeName(field.type)} ${Lang.formatSetter(struct)}() const;
 % endfor
     
     // Field setters
 % for field in struct.fields:
-    void set${field.name}(const ${Lang.getTypeName(field.type)}& value);
+    ${struct.name}* ${Lang.formatSetter(field)}(const ${Lang.getTypeName(field.type)}& value);
 % endfor
+
+    bool operator==(const ${Lang.getTypeClass(struct)}& other) const;
+    
+    bool operator!=(const ${Lang.getTypeClass(struct)}& other) const;
 
 private:
     // Member fields
@@ -53,7 +64,8 @@ private:
     
 }; // ${struct.name}
                  
-}; // namespace ${namespace}
+${Lang.namespaceEnd(struct.path[:-1])}
+
 
 #endif // ${headerGuard}
  

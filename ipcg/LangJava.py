@@ -78,3 +78,14 @@ def getIncludePath(context, idlType, name=None):
         
     return '.'.join(path)
 
+def formatGetter(context, field):
+    prefix = 'get'
+    
+    if field.type == Type.BOOL:
+        prefix = 'is'
+        
+    return prefix + field.name[0].upper() + field.name[1:]
+
+def formatSetter(context, field):
+    return 'set' + field.name[0].upper() + field.name[1:]
+

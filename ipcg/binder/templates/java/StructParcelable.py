@@ -1,6 +1,6 @@
 package ${'.'.join(struct.module.package.path)};
 
-<%namespace name="LangJava" module="ipcg.LangJava"/>
+<%namespace name="Lang" module="ipcg.LangJava"/>
 
 <%
 
@@ -13,7 +13,7 @@ import android.os.Parcelable;
 
 public class ${struct.name} implements Parcelable {
 %if struct.fields:
-    public ${struct.name} (${LangJava.getJavaMethodArgList(struct.fields)}) {
+    public ${struct.name} (${Lang.getJavaMethodArgList(struct.fields)}) {
     % for arg in struct.fields:
         this.${arg.name} = ${arg.name};
     %endfor
@@ -22,7 +22,7 @@ public class ${struct.name} implements Parcelable {
     
     public ${struct.name} () {
     % for arg in struct.fields:
-        this.${arg.name} = ${LangJava.getInvalidJavaValue(arg.type)};
+        this.${arg.name} = ${Lang.getInvalidJavaValue(arg.type)};
     %endfor
     }
     
@@ -31,14 +31,18 @@ public class ${struct.name} implements Parcelable {
         return 0;
     }
     
+    // Field setters
     % for field in struct.fields:
-    public void set${field.name} (${LangJava.getJavaType(field.type)} ${field.name}) {
+    public ${struct.name} ${Lang.formatSetter(field)} (${Lang.getJavaType(field.type)} ${field.name}) {
         this.${field.name} = ${field.name};
+        
+        return this;
     }
     %endfor
 
+    // Field getters
     % for field in struct.fields:
-    public ${LangJava.getJavaType(field.type)} get${field.name} () {
+    public ${Lang.getJavaType(field.type)} ${Lang.formatGetter(field)} () {
         return this.${field.name};
     }
     %endfor    
@@ -123,8 +127,39 @@ public class ${struct.name} implements Parcelable {
         return res + "] }";
     }
 
+    @Override
+    public boolean equals(Object object){
+        if(!(object instanceof ${struct.name})){
+            return false;
+        }
+        
+        ${struct.name} other = (${struct.name})object;
+        
 % for field in struct.fields:
-    private ${LangJava.getJavaType(field.type)} ${field.name}; 
+    % if field.type in [Type.STRING, Type.STRUCTURE]:
+    
+        if(!this.${field.name}.equals(other.${field.name})){
+            return false;
+        }
+        
+    % elif field.type.isPrimitive or field.type == Type.ENUM:
+    
+        if(this.${field.name} != other.${field.name}){
+            return false;
+        }
+        
+    % else:
+    
+            Comparison not implemented for type ${field.type.name}
+            
+    % endif
+% endfor
+        
+        return true;
+    }
+    
+% for field in struct.fields:
+    private ${Lang.getJavaType(field.type)} ${field.name}; 
 %endfor
 
 } //  ${struct.name}

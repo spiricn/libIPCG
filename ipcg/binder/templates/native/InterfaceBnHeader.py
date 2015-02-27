@@ -1,20 +1,24 @@
-<%namespace name="Lang" module="ipcg.LangCPP"/>
+<%!
+import ipcg.LangCPP as Lang
+%>
 
 <%
 from idl.Type import Type
+import ipcg.LangCPP as LangCPP
 
-className = 'Bn' + iface.name
+className = 'Bn' + iface.name[1:]
 
-interfaceClassName = 'I' + iface.name
-
-headerGuard = className.upper() + '_H'
+headerGuard = 'BN_' + LangCPP.getHeaderGuard(iface)
 %>
+
+#ifndef ${headerGuard}
+#define ${headerGuard}
 
 #include "${Lang.getIncludePath(iface)}"
 
-namespace ${namespace} {
+${Lang.namespaceStart(iface.path[:-1])}
 
-class ${className}: public android::BnInterface<${interfaceClassName}>
+class ${className}: public android::BnInterface<${iface.name}>
 {
 public:
     ${className}();
@@ -25,4 +29,6 @@ public:
     
 }; // class ${className}
 
-}; // namespace ${namespace}
+${Lang.namespaceEnd(iface.path[:-1])}
+
+#endif // ${headerGuard}

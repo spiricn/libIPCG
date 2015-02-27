@@ -1,0 +1,11 @@
+package com.ipcg.test;
+
+interface ITestInterface{
+	void testBasic();
+	
+	int32 testArgs(int32 arg1, boolean arg2, TestStruct1 arg3, float32 arg4, float64 arg5, int64 arg6, string arg7, TestEnum1 arg8);
+	
+	int32 setStruct(TestStruct1 arg1);
+	
+	TestStruct1 getStruct();
+};

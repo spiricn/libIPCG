@@ -1,9 +1,12 @@
-<%namespace name="Lang" module="ipcg.LangCPP"/>
+<%!
+import ipcg.LangCPP as Lang
+%>
+
 
 <%
 from idl.Type import Type
 
-className = 'Bp' + iface.name
+className = 'Bp' + iface.name[1:]
 
 %>
 
@@ -25,12 +28,12 @@ className = 'Bp' + iface.name
 
 using namespace android;
 
-namespace ${namespace} {
+${Lang.namespaceStart(iface.path[:-1])}
 
-class ${className} : public BpInterface<I${iface.name}> {
+class ${className} : public BpInterface<${iface.name}> {
 public:
 
-    ${className}(const sp<IBinder>& impl) : BpInterface<I${iface.name}>(impl) {
+    ${className}(const sp<IBinder>& impl) : BpInterface<${iface.name}>(impl) {
     }
                                                        
     virtual ~${className}(){
@@ -45,36 +48,36 @@ public:
         Parcel data;
         Parcel reply;
         
-        data.writeInterfaceToken( I${iface.name}::getInterfaceDescriptor() );
+        data.writeInterfaceToken( ${iface.name}::getInterfaceDescriptor() );
         
-        % for arg in method.args:
+    % for arg in method.args:
         ${Lang.getWriteExpr(arg.name, arg.type, '(&data)')};
-        % endfor
+    % endfor
         
         remote()->transact(${Lang.getMethodId(method)}, data, &reply);
         
         if(reply.readExceptionCode() != 0) {
             // Fail on exception
             return
-        % if method.ret.type != Type.VOID: 
-        ${Lang.getInvalidValue(method.ret.type)}
-        % endif
+    % if method.ret.type != Type.VOID: 
+        ${Lang.getDefaultValue(method.ret.type)}
+    % endif
         ;
         }
         
-        % if method.ret.type != Type.VOID:
-        ${Lang.getTypeName(method.ret.type)} __returnValue = ${Lang.getInvalidValue(method.ret.type)};
+    % if method.ret.type != Type.VOID:
+        ${Lang.getTypeName(method.ret.type)} __returnValue = ${Lang.getDefaultValue(method.ret.type)};
         
         ${Lang.getReadExpr('__returnValue', method.ret.type, 'reply')};
                            
         return __returnValue;
-        % endif
+    % endif
     }
 
     % endfor
 
 }; // class ${className}
 
-IMPLEMENT_META_INTERFACE(${iface.name}, "${'.'.join(iface.path)}");
+IMPLEMENT_META_INTERFACE(${iface.name[1:]}, "${'.'.join(iface.path)}");
 
-}; // ${namespace}
+${Lang.namespaceEnd(iface.path[:-1])}

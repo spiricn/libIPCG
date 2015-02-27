@@ -1,11 +1,11 @@
-<%namespace name="Lang" module="ipcg.LangCPP"/>
+<%!
+import ipcg.LangCPP as Lang
+%>
 
 <%
 from idl.Type import Type
 
-className = 'I' + iface.name
-
-headerGuard = className.upper() + '_H'
+headerGuard = iface.name.upper() + '_H'
 %>
 
 #ifndef ${headerGuard}
@@ -19,12 +19,12 @@ headerGuard = className.upper() + '_H'
 #include "${Lang.getIncludePath(i)}"
 % endfor
 
-namespace ${namespace} {
+${Lang.namespaceStart(iface.path[:-1])}
 
-class ${className} : public android::IInterface
+class ${iface.name} : public android::IInterface
 {
 public:
-    DECLARE_META_INTERFACE( ${iface.name} );
+    DECLARE_META_INTERFACE( ${iface.name[1:]} );
     
 public:
     // Methods
@@ -45,8 +45,8 @@ public:
 
         LAST_ID
     };
-}; // class ${className}
+}; // class ${iface.name}
 
-}; // namespace ${namespace} 
+${Lang.namespaceEnd(iface.path[:-1])}
     
 #endif // ifndef ${headerGuard}

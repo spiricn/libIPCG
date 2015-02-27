@@ -9,14 +9,6 @@ from ipcg.installer.Installer import Installer
 
 
 class BinderGenerator:
-    EXTENSION_JAVA = 'java'
-    
-    EXTENSION_NATIVE_SOURCE = 'cpp'
-    
-    EXTENSION_NATIVE_HEADER = 'h'
-    
-    EXTENSION_AIDL = 'aidl'
-    
     def __init__(self, nativeProjDir, nativeLibraryName, javaProjDir, javaLibraryName):
         self._java = JavaGenerator()
         
@@ -50,7 +42,7 @@ class BinderGenerator:
                 # Java AIDL                    
                 self._installJava(
                     self._java.generateParcelableAIDL(idlType),
-                    self._getFilePath(idlType.module.package, idlType.name + '.aidl')
+                    self._getFilePath(['src'] + idlType.module.package.path, idlType.name + '.aidl')
                 )
                 
                 # Java parcelable function
@@ -62,7 +54,7 @@ class BinderGenerator:
                 # Java parcelable
                 self._installJava(
                     javaParcelableFnc(idlType),
-                    self._getFilePath(idlType.module.package, idlType.name + '.java'),
+                    self._getFilePath(['src'] + idlType.module.package.path, idlType.name + '.java'),
                     addToMakeFile=True
                 )
                 
@@ -75,14 +67,14 @@ class BinderGenerator:
                 # Native header
                 self._installNative(
                     nativeHeaderFnc(idlType),
-                    self._getFilePath(idlType.module.package, idlType.name) + '.h'
+                    self._getFilePath(['include'] + idlType.module.package.path, idlType.name) + '.h'
                 )
                 
                 if idlType == Type.STRUCTURE:
                     # Native source
                     self._installNative(
                         self._native.generateStructParcelableSource(idlType),
-                        self._getFilePath(idlType.module.package, idlType.name) + '.cpp',
+                        self._getFilePath(['source'] + idlType.module.package.path, idlType.name) + '.cpp',
                         addToMakeFile=True
                     )
 
@@ -90,33 +82,33 @@ class BinderGenerator:
                 # AIDL
                 self._installJava(
                     self._java.generateInterfaceAIDL(idlType),
-                    self._getFilePath(idlType.module.package, idlType.name + '.aidl'),
+                    self._getFilePath(['src'] + idlType.module.package.path, idlType.name + '.aidl'),
                     addToMakeFile=True
                 )
                 
                 # Native header
                 self._installNative(
                     self._native.generateInterfaceHeader(idlType),
-                    self._getFilePath(idlType.module.package, 'I' + idlType.name) + '.h'
+                    self._getFilePath(['include'] + idlType.module.package.path, 'I' + idlType.name) + '.h'
                 )
                 
                 # Native Bn header
                 self._installNative(
                     self._native.generateInterfaceBnHeader(idlType),
-                    self._getFilePath(idlType.module.package, 'Bn' + idlType.name) + '.h'
+                    self._getFilePath(['include'] + idlType.module.package.path, 'Bn' + idlType.name[1:]) + '.h'
                 )
                 
                 # Native Bn source
                 self._installNative(
                     self._native.generateInterfaceBnSource(idlType),
-                    self._getFilePath(idlType.module.package, 'Bn' + idlType.name) + '.cpp',
+                    self._getFilePath(['source'] + idlType.module.package.path, 'Bn' + idlType.name[1:]) + '.cpp',
                     addToMakeFile=True
                 )
                 
                 # Native Bp source
                 self._installNative(
                     self._native.generateInterfaceBpSource(idlType),
-                    self._getFilePath(idlType.module.package, 'Bp' + idlType.name) + '.cpp',
+                    self._getFilePath(['source'] + idlType.module.package.path, 'Bp' + idlType.name[1:]) + '.cpp',
                     addToMakeFile=True
                 )      
             
@@ -140,7 +132,7 @@ class BinderGenerator:
         print('%d files installed ( %d up-to-date )' % (result.numFilesInstalled, result.numFilesUpToDate))
         
     def _getFilePath(self, package, name):
-        return '/'.join(package.path) + '/' + name
+        return '/'.join(package) + '/' + name
         
     def _installJava(self, source, path, addToMakeFile=False):
         self._javaProj.install(source, path)

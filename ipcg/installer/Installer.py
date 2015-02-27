@@ -114,8 +114,9 @@ class Installer:
         if oldBuildList:
             for i in oldBuildList:
                 if i not in buildList:
-                    print('Deleting generated file %r' % i)
-                    FileUtils.delete(i)
+                    if os.path.exists(i):
+                        print('Deleting generated file %r' % i)
+                        FileUtils.delete(i)
                 
         # Save new build list
         with open(self._buildListPath, 'wb') as fileObj:

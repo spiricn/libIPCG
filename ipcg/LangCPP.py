@@ -1,27 +1,48 @@
 from idl.Type import Type
 
+from ipcg import Utils
 
-def getInvalidValue(context, itype):
-    valueMap = {
-        Type.VOID : '',
-        Type.BOOL : 'false',
-        Type.FLOAT32 : '-1.0f',
-        Type.STRING : 'android::String16("")',
-        Type.INT32 : '-1',
-        Type.FLOAT64 : '-1.0',
-        Type.INT8 : '-1',
-        Type.INT64 : '-1',
-        Type.ENUM : 'static_cast<' + itype.name + '>(0)',
-        Type.STRUCTURE : 'new ' + itype.name + '()',
-    }
+
+def getDefaultValue(itype):
+    '''
+    Gets a default value for given type (i.e. the value a variable should be initialized to).
+    '''
     
-    if itype.id not in valueMap:
-        return 'NULL'
+    if itype.isPrimitive:
+        # Primitive values
+        return {
+            Type.VOID : '',
+            Type.BOOL : 'false',
+            Type.FLOAT32 : '-1.0f',
+            Type.STRING : 'android::String16("")',
+            Type.INT32 : '-1',
+            Type.FLOAT64 : '-1.0',
+            Type.INT8 : '-1',
+            Type.INT64 : '-1',
+        }[itype.id]
+
+    elif itype == Type.ENUM:
+        # Enumeration
+        return 'static_cast<' + getTypeClass(itype) + '>(' + str(itype.fields[0].value) + ')'
     
+    elif itype == Type.STRUCTURE:
+        # Structure
+        return 'new ' + getTypeClass(itype) + '()'
+        
     else:
-        return valueMap[itype.id]
+        return 'NULL'
 
-def getTypeName(context, idlType):
+def getTypeClass(idlType):
+    '''
+    Gets a class name with namespace of given type (e.g. com::example::test::MyInterface)
+    '''
+    
+    if idlType.id in [Type.INTERFACE, Type.STRUCTURE, Type.ENUM]:
+        return '::'.join(idlType.path) 
+    else:
+        raise RuntimeError('Invalid type %s' % str(idlType))
+
+def getTypeName(idlType):
     '''
     Maps an IDL type ID to C++ type string
     '''
@@ -34,37 +55,53 @@ def getTypeName(context, idlType):
         Type.FLOAT64 : 'double',
         Type.INT8 : 'int8_t',
         Type.INT64 : 'int64_t',
-        Type.STRING : 'android::String16',
-        Type.INTERFACE : 'android::sp<I%s>' % idlType.name
+        Type.STRING : 'android::String16'
     }
     
     if idlType.id in typeMap:
         return typeMap[idlType.id]
             
     elif idlType == Type.ENUM:
-        return idlType.name
-    else:
-        return 'android::sp<%s>' % idlType.name
+        return getTypeClass(idlType)
     
-def getArgList(context, args):
+    else:
+        return 'android::sp<' + getTypeClass(idlType) + '>'
+    
+def getArgList(args):
+    '''
+    Get a method argument list string.
+    '''
+    
     res = ''
     
     for index, arg in enumerate(args):
-        res += getTypeName(context, arg.type) + ' ' + arg.name
+        res += getTypeName(arg.type) + ' ' + arg.name
         
         if index  != len(args) - 1:
             res += ', '
             
     return res
 
-def getMethodSig(context, method):
-    return getTypeName(context, method.ret.type) + ' ' + method.name + '(' + getArgList(context, method.args) + ')' 
+def getMethodSig(method):
+    '''
+    Gets a method signature string (i.e. returnType + name + argList)
+    '''
+    
+    return getTypeName(method.ret.type) + ' ' + method.name + '(' + getArgList(method.args) + ')' 
 
-def getMethodId(context, method):
+def getMethodId(method):
+    '''
+    Gets a method ID enumeration name (used by Bn and Bp itnerface classes)
+    '''
+    
     return 'METHOD_ID_' + method.name.upper()
 
 
-def getReadExpr(context, varName, varType, parcelName):
+def getReadExpr(varName, varType, parcelName):
+    '''
+    Creates a parcel deserialization expression with given variable name and parcel name
+    '''
+    
     if varType.isPrimitive:
         if varType == Type.BOOL:
             return varName + ' = ' + parcelName + '.readInt32() ? true : false'
@@ -88,10 +125,10 @@ def getReadExpr(context, varName, varType, parcelName):
             return '#error Deserialization of type ' + varType.name + ' not implemented'
         
     elif varType == Type.ENUM:
-        return varName + ' = static_cast<' + varType.name + '>(' + parcelName + '.readInt32())'
+        return varName + ' = static_cast<' + getTypeClass(varType) + '>(' + parcelName + '.readInt32())'
     
     elif varType == Type.STRUCTURE:
-        return varName + ' = ' + varType.name + '::readFromParcel(' + parcelName + ')'
+        return varName + ' = ' + getTypeClass(varType) + '::readFromParcel(' + parcelName + ')'
     
     elif varType == Type.INTERFACE:
         res = ''
@@ -99,14 +136,18 @@ def getReadExpr(context, varName, varType, parcelName):
         
         res += 'sp<IBinder> ' + varName + '_binder = ' + parcelName + '.readStrongBinder();\n'
         
-        res += 'if (' + varName + '_binder != NULL) ' + varName + '= interface_cast<I' + varType.name + '>(' + varName + '_binder); else ' + varName + ' = NULL;'
+        res += 'if (' + varName + '_binder != NULL){ ' + varName + '= interface_cast<' + varType.name + '>(' + varName + '_binder); } else {' + varName + ' = NULL; }'
         
         return res
     
     else:
         return '#error Deserialization of type ' + varType.name + ' not implemented'
 
-def getWriteExpr(context, varName, varType, parcelName):
+def getWriteExpr(varName, varType, parcelName):
+    '''
+    Creates a parcel serialization expression with given variable name and parcel name
+    '''
+    
     if varType.isPrimitive:
         if varType == Type.BOOL:
             return parcelName + '->writeInt32(' + varName + ' ? 1 : 0)'
@@ -133,15 +174,15 @@ def getWriteExpr(context, varName, varType, parcelName):
         return parcelName + '->writeInt32(static_cast<int>(' + varName + ' ))'
     
     elif varType == Type.STRUCTURE:
-        return 'if (' + varName + '.get() == NULL ) ' + parcelName + '->writeInt32(0); else ' + varName + '->writeToParcel(' + parcelName + ')'
+        return 'if (' + varName + '.get() == NULL ) { ' + parcelName + '->writeInt32(0); } else { ' + varName + '->writeToParcel(' + parcelName + '); }'
     
     elif varType == Type.INTERFACE:
-        return 'if ( ' + varName + '== NULL) '  + parcelName + '->writeStrongBinder(NULL); else ' + parcelName + '->writeStrongBinder(' + varName + '->asBinder());' 
+        return 'if ( ' + varName + '== NULL) {'  + parcelName + '->writeStrongBinder(NULL); } else { ' + parcelName + '->writeStrongBinder(' + varName + '->asBinder()); }' 
     
     else:
         return '#error Deserialization of type ' + varType.name + ' not implemented'
     
-def getIncludePath(context, idlType, name=None):
+def getIncludePath(idlType, name=None):
     path = idlType.module.package.path
     path.append(idlType.name if not name else name)
     
@@ -149,3 +190,49 @@ def getIncludePath(context, idlType, name=None):
         path[-1] = 'I' + path[-1]
         
     return '/'.join(path) + '.h'
+
+def namespaceStart(namespace):
+    res = '// namespace %s\n' % ('::'.join(namespace))
+    
+    for i in namespace:
+        res += 'namespace ' + i + '{'
+        
+    return res
+    
+def namespaceEnd(namespace):
+    '''
+    Creates a namespace start expression for given type (uses type package as namespace)
+    '''
+    
+    return '%s // namespace %s' % ('}' * len(namespace), '::'.join(namespace))
+
+def getHeaderGuard(idlType):
+    '''
+    Creates a header guard expression for given type.
+    Uses a combination of package + type name.
+    '''
+    
+    sufix = Utils.nameToDefine(idlType.name)
+    
+    prefix = '_'.join( [i.upper() for i in idlType.path[:-1]] )
+    
+    return '_' + prefix + '_' + sufix + '_H_'
+    
+def formatGetter(field):
+    '''
+    Creates a structure getter method name.
+    '''
+    
+    prefix = 'get'
+    
+    if field.type == Type.BOOL:
+        prefix = 'is'
+        
+    return prefix + field.name[0].upper() + field.name[1:]
+
+def formatSetter(field):
+    '''
+    Creates a structure setter method name.
+    '''
+    
+    return 'set' + field.name[0].upper() + field.name[1:]

@@ -1,21 +1,26 @@
-<%namespace name="Lang" module="ipcg.LangCPP"/>
+<%!
+import ipcg.LangCPP as Lang
+import ipcg.Utils as Utils
+%>
 
-<%namespace name="Utils" module="ipcg.Utils"/>
 
 <%
 from idl.Type import Type
 import ipcg.Utils
+import ipcg.LangCPP as LangCPP
 
+# Each enum field gets a prefix (consider using c++11 enum class instead ?)
 enumPrefix = Utils.nameToDefine(enum.name)
 
-headerGuard = enum.name.upper() + '_H'
-
+# File header guard
+headerGuard = LangCPP.getHeaderGuard(enum)
 %>
+
 
 #ifndef ${headerGuard}
 #define ${headerGuard}
 
-namespace ${namespace} {
+${Lang.namespaceStart(enum.path[:-1])}
 
 enum ${enum.name} {
                    
@@ -25,6 +30,6 @@ enum ${enum.name} {
 
 }; // enum ${enum.name}
                         
-}; // namespace ${namespace}
+${Lang.namespaceEnd(enum.path[:-1])}
 
 #endif // ifndef ${headerGuard}
