@@ -9,6 +9,8 @@ package ${'.'.join(struct.module.package.path)};
 ## Generic imports
 import android.os.Parcel;
 import android.os.Parcelable;
+import java.util.ArrayList;
+import java.util.List;
 
 ## Class definition
 public class ${struct.name} implements Parcelable {
@@ -25,7 +27,7 @@ public class ${struct.name} implements Parcelable {
     ## Default constructor
     public ${struct.name} () {
     % for arg in struct.fields:
-        this.${arg.name} = ${Lang.getDefaultValue(arg.type)};
+        this.${arg.name} = ${Lang.getDefaultValue(arg)};
     %endfor
     }
     
@@ -36,7 +38,7 @@ public class ${struct.name} implements Parcelable {
     
     ## Field setters
 % for field in struct.fields:
-    public ${struct.name} ${Lang.formatSetter(field)} (${Lang.getTypeName(field.type)} ${field.name}) {
+    public ${struct.name} ${Lang.formatSetter(field)} (${Lang.getTypeName(field)} ${field.name}) {
         this.${field.name} = ${field.name};
         
         return this;
@@ -45,7 +47,7 @@ public class ${struct.name} implements Parcelable {
 
     ## Field getters
 % for field in struct.fields:
-    public ${Lang.getTypeName(field.type)} ${Lang.formatGetter(field)} () {
+    public ${Lang.getTypeName(field)} ${Lang.formatGetter(field)} () {
         return this.${field.name};
     }
 %endfor    
@@ -53,59 +55,17 @@ public class ${struct.name} implements Parcelable {
     ## Serialization
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        % for field in struct.fields:
-        
-            % if field.type.isPrimitive:
-                % if field.type.id == Type.BOOL:
-        dest.writeInt(this.${field.name} ? 1 : 0);
-                % elif field.type.id == Type.INT32:
-        dest.writeInt(this.${field.name});
-                % elif field.type.id == Type.INT64:
-        dest.writeLong(this.${field.name});
-                % elif field.type.id == Type.STRING:
-        dest.writeString(this.${field.name});
-                % elif field.type.id == Type.FLOAT64:
-        dest.writeDouble(this.${field.name});
-                % elif field.type.id == Type.FLOAT32:
-        dest.writeFloat(this.${field.name});
-                % else:
-                Unsupported primitive ${field.type.name} for field ${field.name}
-                % endif
-            % elif field.type in [Type.STRUCTURE, Type.ENUM]:
-        ${field.name}.writeToParcel(dest, flags);
-            % else:
-                Unsupported type ${field.type.name} for field ${field.name}
-            % endif
-        %endfor
+    % for field in struct.fields:
+        ${Lang.getWriteExpr('this.' + field.name, field, 'dest')};
+    % endfor
     }
     
     ## Deserialization
     public ${struct.name} readFromParcel(Parcel in) {
-        % for field in struct.fields:
-        
-            % if field.type.isPrimitive:
-                % if field.type.id == Type.BOOL:
-        this.${field.name} = in.readByte() == 0 ? false : true;
-                % elif field.type.id == Type.INT32:
-        this.${field.name} = in.readInt();
-                % elif field.type.id == Type.INT64:
-        this.${field.name} = in.readLong();
-                % elif field.type.id == Type.STRING:
-        this.${field.name} = in.readString();
-                % elif field.type.id == Type.FLOAT64:
-        this.${field.name} = in.readDouble();
-                % elif field.type.id == Type.FLOAT32:
-        this.${field.name} = in.readFloat();
-                % else:
-                Unsupported primitive '$field.type.name' for field $field.name
-                % endif
-            % elif field.type in [Type.STRUCTURE, Type.ENUM]:
-        this.${field.name} = ${field.type.name}.CREATOR.createFromParcel(in);
-            % else:
-                Unsupported type '$field.type.name' for field $field.name
-            % endif
-        %endfor
-        
+    % for field in struct.fields:
+        ${Lang.getReadExpr('this.' + field.name, field, 'in')};
+    % endfor
+    
         return this;
     }
     
@@ -166,7 +126,7 @@ public class ${struct.name} implements Parcelable {
     
     ## Member fields declaration
 % for field in struct.fields:
-    private ${Lang.getTypeName(field.type)} ${field.name}; 
+    private ${Lang.getTypeName(field)} ${field.name}; 
 %endfor
 
 } //  ${struct.name}

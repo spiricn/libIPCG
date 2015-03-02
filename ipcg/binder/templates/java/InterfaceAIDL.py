@@ -17,7 +17,7 @@ interface ${iface.name} {
 % for method in iface.methods:
 
     ## Method declaration
-    ${Lang.getTypeName(method.ret.type)} ${method.name} ( ${Lang.getAIDLMethodArgList(method.args)} );
+    ${Lang.getTypeName(method.ret)} ${method.name} ( ${Lang.getAIDLMethodArgList(method.args)} );
 
 % endfor                         
 } // ${iface.name}
