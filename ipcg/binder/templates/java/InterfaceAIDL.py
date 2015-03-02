@@ -1,21 +1,23 @@
-package ${'.'.join(iface.module.package.path)};
-
-<%namespace name="Lang" module="ipcg.LangJava"/>
-
-<%
-
+<%!
+import ipcg.binder.LangJava as Lang
 from idl.Type import Type
-
 %>
 
+## Package declaration
+package ${'.'.join(iface.module.package.path)};
+
+## Import dependencies
 % for i in iface.dependencies:
 import ${'.'.join(i.module.package.path) + '.' + i.name};
 % endfor
+
+## Interface declaration
 interface ${iface.name} {
 
 % for method in iface.methods:
-    ${Lang.getJavaType(method.ret.type)} ${method.name} ( ${Lang.getAIDLMethodArgList(method.args)} );
+
+    ## Method declaration
+    ${Lang.getTypeName(method.ret.type)} ${method.name} ( ${Lang.getAIDLMethodArgList(method.args)} );
 
 % endfor                         
 } // ${iface.name}
-

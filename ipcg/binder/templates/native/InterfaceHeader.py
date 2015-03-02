@@ -1,10 +1,9 @@
 <%!
-import ipcg.LangCPP as Lang
+import ipcg.binder.LangCPP as Lang
+from idl.Type import Type
 %>
 
 <%
-from idl.Type import Type
-
 headerGuard = iface.name.upper() + '_H'
 %>
 

@@ -1,5 +1,3 @@
-import os
-
 from idl.Environment import Environment
 from idl.Type import Type
 
@@ -9,6 +7,10 @@ from ipcg.installer.Installer import Installer
 
 
 class BinderGenerator:
+    '''
+    Class used to generate Android binder Java and C++ IPC libraries.
+    '''
+    
     def __init__(self, nativeProjDir, nativeLibraryName, javaProjDir, javaLibraryName):
         self._java = JavaGenerator()
         
@@ -32,9 +34,20 @@ class BinderGenerator:
         
     @property
     def env(self):
+        '''
+        libIDL environment used by the generator
+        '''
+        
         return self._env
     
     def generate(self):
+        '''
+        Generates source files at previously specified locations. Will not
+        preform installation if files are up-to-date.\
+        
+        @return: Object of type ipcg.installer.Installer.Statistics
+        '''
+        
         self._installer.begin()
         
         for idlType in self._env.types:
@@ -127,9 +140,7 @@ class BinderGenerator:
             'Android.mk'
         )
         
-        result = self._installer.commit()
-        
-        print('%d files installed ( %d up-to-date )' % (result.numFilesInstalled, result.numFilesUpToDate))
+        return self._installer.commit()
         
     def _getFilePath(self, package, name):
         return '/'.join(package) + '/' + name

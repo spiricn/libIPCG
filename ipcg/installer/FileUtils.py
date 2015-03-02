@@ -31,15 +31,12 @@ class FileUtils:
     def installFile(source, destination):
         if os.path.exists(destination) and FileUtils.compare(source, destination):
             # No need to install (files already same)
-            print('File up-to-date %r' % source)
             return False
             
         FileUtils.makeTree(os.path.dirname(destination))
         
         FileUtils.copy(source, destination)
 
-        print('Install file %r' % destination)
-        
         return True
     
     @staticmethod

@@ -13,15 +13,11 @@ def test():
         'libTestIPCGJava',
     )
     
-    print('copmile')
-    
     generator.env.compileTree('./idl')
     
-    print('generate')
+    result = generator.generate()
     
-    generator.generate()
+    print('%d installed / %d deleted ( %d up-to-date )' % (result.numFilesInstalled, result.numFilesDeleted, result.numFilesUpToDate))
     
-    print('done')
-
 if __name__ == '__main__':
     test()

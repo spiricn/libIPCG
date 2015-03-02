@@ -1,30 +1,27 @@
 <%!
-import ipcg.LangCPP as Lang
+import ipcg.binder.LangCPP as Lang
+from idl.Type import Type
 %>
 
-
 <%
-from idl.Type import Type
-
 className = 'Bn' + iface.name[1:]
 
 headerGuard = className.upper() + '_H'
 
 methodResult = '__methodResult'
-
 %>
 
 #include <binder/IInterface.h>
 #include <binder/Parcel.h>
 
-#include "${Lang.getIncludePath(iface, 'Bn' + iface.name[1:])}"
+#include "${Lang.getIncludePath(iface, className)}"
 
-#ifdef LOG_TAG
 #undef LOG_TAG
 #endif
 
 #define LOG_TAG "${namespace}_${className}"
 
+## Start namespace
 using namespace android;
 
 ${Lang.namespaceStart(iface.path[:-1])}

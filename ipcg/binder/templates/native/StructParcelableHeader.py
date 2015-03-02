@@ -1,16 +1,12 @@
 <%!
-import ipcg.LangCPP as Lang
+import ipcg.binder.LangCPP as Lang
 import ipcg.Utils as Utils
 %>
 
-
 <%
-
-from idl.Type import Type
-
 headerGuard = struct.name.upper() + '_H'
-
 %>
+
 #ifndef ${headerGuard}
 #define ${headerGuard}
 

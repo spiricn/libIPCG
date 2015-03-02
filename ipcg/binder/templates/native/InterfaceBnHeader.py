@@ -1,14 +1,12 @@
 <%!
-import ipcg.LangCPP as Lang
+import ipcg.binder.LangCPP as Lang
+from idl.Type import Type
 %>
 
 <%
-from idl.Type import Type
-import ipcg.LangCPP as LangCPP
-
 className = 'Bn' + iface.name[1:]
 
-headerGuard = 'BN_' + LangCPP.getHeaderGuard(iface)
+headerGuard = 'BN_' + Lang.getHeaderGuard(iface)
 %>
 
 #ifndef ${headerGuard}

@@ -1,7 +1,10 @@
 from idl.Type import Type
 
-
-def getInvalidJavaValue(context, itype):
+def getDefaultValue(itype):
+    '''
+    Gets a default value for given type (i.e. the value a variable should be initialized to).
+    '''
+    
     valueMap = {
         Type.VOID : '',
         Type.BOOL : 'false',
@@ -21,9 +24,9 @@ def getInvalidJavaValue(context, itype):
     else:
         return valueMap[itype.id]
 
-def getJavaType(context, idlType):
+def getTypeName(itype):
     '''
-    Maps an IDL type ID to AIDL type string
+    Maps an IDL type ID to Java type string
     '''
 
     typeMap = {
@@ -37,48 +40,53 @@ def getJavaType(context, idlType):
         Type.INT64 : 'long',
     }
     
-    if idlType.isPrimitive:
-        if idlType.id not in typeMap:
-            raise RuntimeError('Unsupported type %d' % idlType.id)
+    if itype.isPrimitive:
+        if itype.id not in typeMap:
+            raise RuntimeError('Unsupported type %d' % itype.id)
         
         else:
-            return typeMap[idlType.id]
+            return typeMap[itype.id]
     else:
-        return idlType.name
+        return '.'.join(itype.path)
     
-def getJavaMethodArgList(context, args):
+def getMethodArgList(args, isAidl):
+    '''
+    Gets Java or AIDL method argument list string.
+    '''
+    
     res = ''
     
     for index, arg in enumerate(args):
-        res += getJavaType(context, arg.type) + ' ' + arg.name
-        
-        if index  != len(args) - 1:
-            res += ', '
-            
-    return res
-
-def getAIDLMethodArgList(context, args):
-    res = ''
-    
-    for index, arg in enumerate(args):
-        if arg.type in [Type.STRUCTURE, Type.INTERFACE,Type.ENUM]:
+        if arg.type in [Type.STRUCTURE, Type.INTERFACE,Type.ENUM] and isAidl:
             res += 'in' if arg.mod(Type.MOD_IN) else 'out' if arg.mod(Type.MOD_OUT) else 'inout'
             res += ' '
             
-        res += getJavaType(context, arg.type) + ' ' + arg.name
+        res += getTypeName(arg.type) + ' ' + arg.name
         
         if index  != len(args) - 1:
             res += ', '
             
     return res
 
-def getIncludePath(context, idlType, name=None):
-    path = idlType.module.package.path
-    path.append(idlType.name if not name else name)
-        
-    return '.'.join(path)
+def getJavaMethodArgList(args):
+    '''
+    Gets Java method argument list string.
+    '''
+    
+    return getMethodArgList(args, isAidl=False)
 
-def formatGetter(context, field):
+def getAIDLMethodArgList(args):
+    '''
+    Gets AIDL method argument list string.
+    '''
+    
+    return getMethodArgList(args, isAidl=True)
+
+def formatGetter(field):
+    '''
+    Format Java field getter method name for given field.
+    '''
+    
     prefix = 'get'
     
     if field.type == Type.BOOL:
@@ -86,6 +94,9 @@ def formatGetter(context, field):
         
     return prefix + field.name[0].upper() + field.name[1:]
 
-def formatSetter(context, field):
+def formatSetter(field):
+    '''
+    Format Java field setter method name for given field.
+    '''
+    
     return 'set' + field.name[0].upper() + field.name[1:]
-

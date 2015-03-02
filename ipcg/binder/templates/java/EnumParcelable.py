@@ -1,20 +1,19 @@
-package ${'.'.join(enum.module.package.path)};
-
-
-<%namespace name="LangJava" module="ipcg.LangJava"/>
-
-<%
-
+<%!
+import ipcg.binder.LangJava as Lang
 from idl.Type import Type
-
 %>
 
+## Package declaration
+package ${'.'.join(enum.module.package.path)};
 
+## Generic imports
 import android.os.Parcel;
 import android.os.Parcelable;
 
+## Class definition
 public enum ${enum.name} implements Parcelable {
                         
+## Enum fields
 % for index, field in enumerate(enum.fields):
     ${field.name}(${field.value})
     % if index < len(enum.fields) - 1:
@@ -23,10 +22,12 @@ public enum ${enum.name} implements Parcelable {
 % endfor
     ;
 
+    ## Value constructor
     ${enum.name}(int value){
         mValue = value;
     } 
                         
+    ## Value getter
     public int getValue(){
         return mValue;
     }
@@ -58,6 +59,7 @@ public enum ${enum.name} implements Parcelable {
             return new ${enum.name} [size];
         }
     };
-                        
+
     private int mValue;
+
 } // ${enum.name}

@@ -1,9 +1,6 @@
-<%
-
+<%!
 from idl.Type import Type
-
-import ipcg.LangCPP as Lang
-
+import ipcg.binder.LangCPP as Lang
 %>
 
 #include "${Lang.getIncludePath(struct)}"

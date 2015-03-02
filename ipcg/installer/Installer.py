@@ -8,9 +8,10 @@ from ipcg.installer.FileUtils import FileUtils
 
 class Installer:
     class Statistics:
-        def __init__(self, installed, upToDate):
+        def __init__(self, installed, upToDate, deleted):
             self.numFilesInstalled = installed
             self.numFilesUpToDate = upToDate
+            self.numFilesDeleted = deleted
             
     STATE_IDLE, \
     STATE_TRANSACTION, \
@@ -76,7 +77,6 @@ class Installer:
             return
         
         for i in buildList:
-            print('Clean %r' % i)
             if os.path.exists(i):
                 FileUtils.delete(i)
             
@@ -95,6 +95,7 @@ class Installer:
         
         numInstalled = 0
         numUpToDate = 0
+        deleted = 0
         
         # Load old build list
         oldBuildList = self._readBuildList()
@@ -115,8 +116,9 @@ class Installer:
             for i in oldBuildList:
                 if i not in buildList:
                     if os.path.exists(i):
-                        print('Deleting generated file %r' % i)
                         FileUtils.delete(i)
+                        
+                        deleted += 1
                 
         # Save new build list
         with open(self._buildListPath, 'wb') as fileObj:
@@ -124,5 +126,4 @@ class Installer:
             
         self._state = Installer.STATE_IDLE
         
-        return Installer.Statistics(numInstalled, numUpToDate)
-
+        return Installer.Statistics(numInstalled, numUpToDate, deleted)

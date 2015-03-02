@@ -1,17 +1,19 @@
-package ${'.'.join(struct.module.package.path)};
-
-<%namespace name="Lang" module="ipcg.LangJava"/>
-
-<%
-
+<%!
 from idl.Type import Type
-
+import ipcg.binder.LangJava as Lang
 %>
 
+## Package declaration
+package ${'.'.join(struct.module.package.path)};
+
+## Generic imports
 import android.os.Parcel;
 import android.os.Parcelable;
 
+## Class definition
 public class ${struct.name} implements Parcelable {
+                                                   
+    ## Argument constructor
 %if struct.fields:
     public ${struct.name} (${Lang.getJavaMethodArgList(struct.fields)}) {
     % for arg in struct.fields:
@@ -20,9 +22,10 @@ public class ${struct.name} implements Parcelable {
     }
 % endif
     
+    ## Default constructor
     public ${struct.name} () {
     % for arg in struct.fields:
-        this.${arg.name} = ${Lang.getInvalidJavaValue(arg.type)};
+        this.${arg.name} = ${Lang.getDefaultValue(arg.type)};
     %endfor
     }
     
@@ -31,22 +34,23 @@ public class ${struct.name} implements Parcelable {
         return 0;
     }
     
-    // Field setters
-    % for field in struct.fields:
-    public ${struct.name} ${Lang.formatSetter(field)} (${Lang.getJavaType(field.type)} ${field.name}) {
+    ## Field setters
+% for field in struct.fields:
+    public ${struct.name} ${Lang.formatSetter(field)} (${Lang.getTypeName(field.type)} ${field.name}) {
         this.${field.name} = ${field.name};
         
         return this;
     }
     %endfor
 
-    // Field getters
-    % for field in struct.fields:
-    public ${Lang.getJavaType(field.type)} ${Lang.formatGetter(field)} () {
+    ## Field getters
+% for field in struct.fields:
+    public ${Lang.getTypeName(field.type)} ${Lang.formatGetter(field)} () {
         return this.${field.name};
     }
-    %endfor    
+%endfor    
     
+    ## Serialization
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         % for field in struct.fields:
@@ -75,6 +79,7 @@ public class ${struct.name} implements Parcelable {
         %endfor
     }
     
+    ## Deserialization
     public ${struct.name} readFromParcel(Parcel in) {
         % for field in struct.fields:
         
@@ -127,6 +132,7 @@ public class ${struct.name} implements Parcelable {
         return res + "] }";
     }
 
+    ## Equals operator
     @Override
     public boolean equals(Object object){
         if(!(object instanceof ${struct.name})){
@@ -158,8 +164,9 @@ public class ${struct.name} implements Parcelable {
         return true;
     }
     
+    ## Member fields declaration
 % for field in struct.fields:
-    private ${Lang.getJavaType(field.type)} ${field.name}; 
+    private ${Lang.getTypeName(field.type)} ${field.name}; 
 %endfor
 
 } //  ${struct.name}
