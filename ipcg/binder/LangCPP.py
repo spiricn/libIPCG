@@ -276,3 +276,4 @@ def formatSetter(field):
     '''
     
     return 'set' + field.name[0].upper() + field.name[1:]
+

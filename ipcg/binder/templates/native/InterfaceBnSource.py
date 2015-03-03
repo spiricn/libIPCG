@@ -20,7 +20,7 @@ methodResult = '__methodResult'
 #undef LOG_TAG
 #endif
 
-#define LOG_TAG "${namespace}_${className}"
+#define LOG_TAG "${':'.join(iface.module.package.path) + ':' + className}"
 
 ## Start namespace
 using namespace android;
@@ -72,7 +72,7 @@ status_t ${className}::onTransact(uint32_t code, const android::Parcel& data, an
             
             );
             
-            // Write result ?
+            // Write result
             reply->writeNoException();
             
             % if method.ret.type != Type.VOID:

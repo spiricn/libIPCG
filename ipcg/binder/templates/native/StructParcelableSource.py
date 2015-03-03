@@ -11,7 +11,7 @@ import ipcg.binder.LangCPP as Lang
 #undef LOG_TAG
 #endif
 
-#define LOG_TAG "${namespace}_${struct.name}"
+#define LOG_TAG "${':'.join(struct.path)}"
 
 using namespace android;
 

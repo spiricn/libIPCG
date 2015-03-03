@@ -10,7 +10,7 @@ className = 'Bp' + iface.name[1:]
 #include <binder/IInterface.h>
 #include <binder/Parcel.h>
 
-#include "${Lang.getIncludePath(iface)}"
+#define LOG_TAG "${':'.join(iface.module.package.path) + ':' + className}"
 
 // Dependency includes
 % for i in iface.dependencies:
@@ -20,8 +20,6 @@ className = 'Bp' + iface.name[1:]
 #ifdef LOG_TAG
 #undef LOG_TAG
 #endif
-
-#define LOG_TAG "${namespace}_${className}"
 
 using namespace android;
 

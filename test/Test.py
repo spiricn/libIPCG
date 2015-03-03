@@ -1,11 +1,11 @@
+import sys
+
 from ipcg.binder.BinderGenerator import BinderGenerator
 
 
 def test():
-#     out = 'D:/home/dev/workspace/testIPCG'
+    out = sys.argv[1]
 
-    out = '/home/nikola/prog/workspace/LAOSP_5.0.0.R7/external/test'
-    
     generator = BinderGenerator(
         out + '/libTestIPCGNative',
         'libTestIPCGNative',
