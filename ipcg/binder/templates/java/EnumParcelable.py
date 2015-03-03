@@ -32,8 +32,14 @@ public enum ${enum.name} implements Parcelable {
         return mValue;
     }
     
-    static ${enum.name} getFromValue(itn value){
-        // TODO
+    static ${enum.name} getFromValue(int value){
+        for( ${enum.name} i : values()){
+            if(i.getValue() == value){
+                return i;
+            }
+        }
+        
+        return null;
     }
     
     @Override

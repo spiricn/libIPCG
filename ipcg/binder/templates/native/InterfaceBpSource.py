@@ -48,7 +48,7 @@ public:
         data.writeInterfaceToken( ${iface.name}::getInterfaceDescriptor() );
         
     % for arg in method.args:
-        ${Lang.getWriteExpr(arg.name, arg.type, '(&data)')};
+        ${Lang.getWriteExpr(arg.name, arg, '(&data)')};
     % endfor
         
         remote()->transact(${Lang.getMethodId(method)}, data, &reply);
@@ -63,9 +63,9 @@ public:
         }
         
     % if method.ret.type != Type.VOID:
-        ${Lang.getTypeName(method.ret.type)} __returnValue = ${Lang.getDefaultValue(method.ret.type)};
+        ${Lang.getTypeName(method.ret)} __returnValue = ${Lang.getDefaultValue(method.ret)};
         
-        ${Lang.getReadExpr('__returnValue', method.ret.type, 'reply')};
+        ${Lang.getReadExpr('__returnValue', method.ret, 'reply')};
                            
         return __returnValue;
     % endif

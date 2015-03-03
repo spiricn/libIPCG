@@ -21,7 +21,7 @@ ${Lang.namespaceStart(struct.path[:-1])}
 ${struct.name}::${struct.name}(){
     // Member initialization
 % for field in struct.fields:
-    this->${field.name} = ${Lang.getDefaultValue(field.type)};
+    this->${field.name} = ${Lang.getDefaultValue(field)};
 % endfor
 }
 
@@ -33,7 +33,7 @@ ${struct.name}::${struct.name}(const ${struct.name}& other){
         this->${field.name} = other.${field.name};
     % elif field.type == Type.STRUCTURE:
         if(other.${field.name}.get()){
-            this->${field.name} = new ${Lang.getTypeClass(field.type)}(*other.${field.name}.get());
+            this->${field.name} = new ${Lang.getTypeClass(field)}(*other.${field.name}.get());
         }
         else{
              this->${field.name} = NULL;
@@ -59,7 +59,7 @@ sp<${struct.name}> ${struct.name}::readFromParcel(const Parcel& data){
     ${struct.name}* res = new ${struct.name};
     
 % for field in struct.fields:
-    ${Lang.getReadExpr('res->' + field.name, field.type, 'data')};
+    ${Lang.getReadExpr('res->' + field.name, field, 'data')};
 % endfor
 
     return res;
@@ -71,7 +71,7 @@ status_t ${struct.name}::writeToParcel(Parcel* data) const{
     data->writeInt32(1);
     
 % for field in struct.fields:
-    ${Lang.getWriteExpr('this->' + field.name, field.type, 'data')};
+    ${Lang.getWriteExpr('this->' + field.name, field, 'data')};
 % endfor
     
     return NO_ERROR;
@@ -79,14 +79,14 @@ status_t ${struct.name}::writeToParcel(Parcel* data) const{
 
 // Field getters
 % for field in struct.fields:
-${Lang.getTypeName(field.type)} ${struct.name}::${Lang.formatGetter(field)}() const{
+${Lang.getTypeName(field)} ${struct.name}::${Lang.formatGetter(field)}() const{
     return this->${field.name};
 }
 % endfor
 
 // Field setters
 % for field in struct.fields:
-${struct.name}* ${struct.name}::${Lang.formatSetter(field)}(const ${Lang.getTypeName(field.type)}& value){
+${struct.name}* ${struct.name}::${Lang.formatSetter(field)}(const ${Lang.getTypeName(field)}& value){
     this->${field.name} = value;
     
     return this;

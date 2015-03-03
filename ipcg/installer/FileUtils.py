@@ -56,8 +56,11 @@ class FileUtils:
         FileUtils.makeTree(dirPath)
         
         with open(fullPath, 'wb') as fileObj:
-            fileObj.write(bytes(source, 'UTF-8'))
-#             fileObj.write(source)
+            # TODO Fix this
+            try:
+                fileObj.write(bytes(source, 'UTF-8'))
+            except TypeError:                
+                fileObj.write(source)
             
         return True
             

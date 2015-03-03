@@ -12,9 +12,11 @@ headerGuard = struct.name.upper() + '_H'
 
 // Dependency includes
 % for i in struct.dependencies:
+// ${i.name}
 #include "${Lang.getIncludePath(i)}"
 % endfor
 #include <binder/Parcel.h>
+#include <utils/Vector.h>
 
 ${Lang.namespaceStart(struct.path[:-1])}
                  
@@ -37,12 +39,12 @@ public:
     
     // Field getters
 % for field in struct.fields:
-    ${Lang.getTypeName(field.type)} ${Lang.formatSetter(struct)}() const;
+    ${Lang.getTypeName(field)} ${Lang.formatGetter(field)}() const;
 % endfor
     
     // Field setters
 % for field in struct.fields:
-    ${struct.name}* ${Lang.formatSetter(field)}(const ${Lang.getTypeName(field.type)}& value);
+    ${struct.name}* ${Lang.formatSetter(field)}(const ${Lang.getTypeName(field)}& value);
 % endfor
 
     bool operator==(const ${Lang.getTypeClass(struct)}& other) const;
@@ -52,7 +54,7 @@ public:
 private:
     // Member fields
 % for field in struct.fields:
-    ${Lang.getTypeName(field.type)} ${field.name};
+    ${Lang.getTypeName(field)} ${field.name};
 % endfor
     
 private:

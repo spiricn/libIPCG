@@ -16,6 +16,7 @@ methodResult = '__methodResult'
 
 #include "${Lang.getIncludePath(iface, className)}"
 
+#ifdef LOG_TAG
 #undef LOG_TAG
 #endif
 
@@ -36,19 +37,19 @@ status_t ${className}::onTransact(uint32_t code, const android::Parcel& data, an
             
             // Declare method arguments
         % for arg in method.args:
-            ${Lang.getTypeName(arg.type)} ${arg.name} = ${Lang.getDefaultValue(arg.type)};
+            ${Lang.getTypeName(arg.type)} ${arg.name} = ${Lang.getDefaultValue(arg)};
         % endfor
             
             // Declare return type
             
             % if method.ret.type != Type.VOID:
-            ${Lang.getTypeName(method.ret.type)} ${methodResult} = ${Lang.getDefaultValue(method.ret.type)};
+            ${Lang.getTypeName(method.ret.type)} ${methodResult} = ${Lang.getDefaultValue(method.ret)};
             % endif
             
             // Deserialize arguments
             
         % for arg in method.args:
-            ${Lang.getReadExpr(arg.name, arg.type, 'data')};
+            ${Lang.getReadExpr(arg.name, arg, 'data')};
         % endfor
         
             % if method.ret.type != Type.VOID:
@@ -71,11 +72,11 @@ status_t ${className}::onTransact(uint32_t code, const android::Parcel& data, an
             
             );
             
-            // Write result
+            // Write result ?
             reply->writeNoException();
             
             % if method.ret.type != Type.VOID:
-            ${Lang.getWriteExpr(methodResult, method.ret.type, 'reply')};
+            ${Lang.getWriteExpr(methodResult, method.ret, 'reply')};
             % endif
             
             ALOGD("[call end][${method.name}]");

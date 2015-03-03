@@ -3,69 +3,93 @@ from idl.Type import Type
 from ipcg import Utils
 
 
-def getDefaultValue(itype):
+def getDefaultValue(var):
     '''
     Gets a default value for given type (i.e. the value a variable should be initialized to).
     '''
     
-    if itype.isPrimitive:
-        # Primitive values
-        return {
-            Type.VOID : '',
-            Type.BOOL : 'false',
-            Type.FLOAT32 : '-1.0f',
-            Type.STRING : 'android::String16("")',
-            Type.INT32 : '-1',
-            Type.FLOAT64 : '-1.0',
-            Type.INT8 : '-1',
-            Type.INT64 : '-1',
-        }[itype.id]
-
-    elif itype == Type.ENUM:
-        # Enumeration
-        return 'static_cast<' + getTypeClass(itype) + '>(' + str(itype.fields[0].value) + ')'
+    if isinstance(var, Type):
+        if var.isPrimitive:
+            # Primitive values
+            return {
+                Type.VOID : '',
+                Type.BOOL : 'false',
+                Type.FLOAT32 : '-1.0f',
+                Type.STRING : 'android::String16("")',
+                Type.INT32 : '-1',
+                Type.FLOAT64 : '-1.0',
+                Type.INT8 : '-1',
+                Type.INT64 : '-1',
+            }[var.id]
     
-    elif itype == Type.STRUCTURE:
-        # Structure
-        return 'new ' + getTypeClass(itype) + '()'
+        elif var == Type.ENUM:
+            # Enumeration
+            return 'static_cast<' + getTypeClass(var) + '>(' + str(var.fields[0].value) + ')'
         
+        elif var == Type.STRUCTURE:
+            # Structure
+            return 'new ' + getTypeClass(var) + '()'
+            
+        else:
+            return 'NULL'
+    
     else:
-        return 'NULL'
+        if var.isArray:
+            return 'new android::Vector<' + getTypeClass(var.type) + '>()'
+        
+        else:
+            return getDefaultValue(var.type)
 
-def getTypeClass(idlType):
+def getTypeClass(var):
     '''
     Gets a class name with namespace of given type (e.g. com::example::test::MyInterface)
     '''
     
-    if idlType.id in [Type.INTERFACE, Type.STRUCTURE, Type.ENUM]:
-        return '::'.join(idlType.path) 
+    if isinstance(var, Type):
+        if var.id in [Type.INTERFACE, Type.STRUCTURE, Type.ENUM]:
+            return '::'.join(var.path) 
+        else:
+            raise RuntimeError('Invalid type %s' % str(var))
     else:
-        raise RuntimeError('Invalid type %s' % str(idlType))
+        if var.isArray:
+            # TODO
+            pass
+        
+        else:
+            return getTypeClass(var.type)
 
-def getTypeName(idlType):
+def getTypeName(var):
     '''
     Maps an IDL type ID to C++ type string
     '''
 
-    typeMap = {
-        Type.VOID : 'void',
-        Type.BOOL : 'bool',
-        Type.FLOAT32 : 'float',
-        Type.INT32 : 'int32_t',
-        Type.FLOAT64 : 'double',
-        Type.INT8 : 'int8_t',
-        Type.INT64 : 'int64_t',
-        Type.STRING : 'android::String16'
-    }
-    
-    if idlType.id in typeMap:
-        return typeMap[idlType.id]
-            
-    elif idlType == Type.ENUM:
-        return getTypeClass(idlType)
-    
+    if isinstance(var, Type):
+        typeMap = {
+            Type.VOID : 'void',
+            Type.BOOL : 'bool',
+            Type.FLOAT32 : 'float',
+            Type.INT32 : 'int32_t',
+            Type.FLOAT64 : 'double',
+            Type.INT8 : 'int8_t',
+            Type.INT64 : 'int64_t',
+            Type.STRING : 'android::String16'
+        }
+        
+        if var.id in typeMap:
+            return typeMap[var.id]
+                
+        elif var == Type.ENUM:
+            return getTypeClass(var)
+        
+        else:
+            return 'android::sp<' + getTypeClass(var) + '>'
+        
     else:
-        return 'android::sp<' + getTypeClass(idlType) + '>'
+        if var.isArray:
+            return 'android::sp<android::Vector<' + getTypeClass(var.type)  + '> >'
+        
+        else:
+            return getTypeName(var.type)
     
 def getArgList(args):
     '''
@@ -97,90 +121,106 @@ def getMethodId(method):
     return 'METHOD_ID_' + method.name.upper()
 
 
-def getReadExpr(varName, varType, parcelName):
+def getReadExpr(varName, var, parcelName):
     '''
     Creates a parcel deserialization expression with given variable name and parcel name
     '''
     
-    if varType.isPrimitive:
-        if varType == Type.BOOL:
-            return varName + ' = ' + parcelName + '.readInt32() ? true : false'
+    if isinstance(var, Type):
+        if var.isPrimitive:
+            if var == Type.BOOL:
+                return varName + ' = ' + parcelName + '.readInt32() ? true : false'
+            
+            elif var == Type.INT32:
+                return varName + ' = ' + parcelName + '.readInt32()'
+            
+            elif var == Type.INT64:
+                return varName + ' = ' + parcelName + '.readInt64()'
+            
+            elif var == Type.FLOAT32:
+                return varName + ' = ' + parcelName + '.readFloat()'
+            
+            elif var == Type.FLOAT64:
+                return varName + ' = ' + parcelName + '.readDouble()'
+            
+            elif var == Type.STRING:
+                return varName + ' = ' + parcelName + '.readString16()'
+            
+            else:
+                return '#error Deserialization of type ' + var.name + ' not implemented'
+            
+        elif var == Type.ENUM:
+            return varName + ' = static_cast<' + getTypeClass(var) + '>(' + parcelName + '.readInt32())'
         
-        elif varType == Type.INT32:
-            return varName + ' = ' + parcelName + '.readInt32()'
+        elif var == Type.STRUCTURE:
+            return varName + ' = ' + getTypeClass(var) + '::readFromParcel(' + parcelName + ')'
         
-        elif varType == Type.INT64:
-            return varName + ' = ' + parcelName + '.readInt64()'
-        
-        elif varType == Type.FLOAT32:
-            return varName + ' = ' + parcelName + '.readFloat()'
-        
-        elif varType == Type.FLOAT64:
-            return varName + ' = ' + parcelName + '.readDouble()'
-        
-        elif varType == Type.STRING:
-            return varName + ' = ' + parcelName + '.readString16()'
+        elif var == Type.INTERFACE:
+            res = ''
+            
+            
+            res += 'sp<IBinder> ' + varName + '_binder = ' + parcelName + '.readStrongBinder();\n'
+            
+            res += 'if (' + varName + '_binder != NULL){ ' + varName + '= interface_cast<' + var.name + '>(' + varName + '_binder); } else {' + varName + ' = NULL; }'
+            
+            return res
         
         else:
-            return '#error Deserialization of type ' + varType.name + ' not implemented'
-        
-    elif varType == Type.ENUM:
-        return varName + ' = static_cast<' + getTypeClass(varType) + '>(' + parcelName + '.readInt32())'
-    
-    elif varType == Type.STRUCTURE:
-        return varName + ' = ' + getTypeClass(varType) + '::readFromParcel(' + parcelName + ')'
-    
-    elif varType == Type.INTERFACE:
-        res = ''
-        
-        
-        res += 'sp<IBinder> ' + varName + '_binder = ' + parcelName + '.readStrongBinder();\n'
-        
-        res += 'if (' + varName + '_binder != NULL){ ' + varName + '= interface_cast<' + varType.name + '>(' + varName + '_binder); } else {' + varName + ' = NULL; }'
-        
-        return res
-    
+            return '#error Deserialization of type ' + var.name + ' not implemented'
     else:
-        return '#error Deserialization of type ' + varType.name + ' not implemented'
+        if var.isArray:
+            # TODO
+            return ''
+            
+        else:
+            return getReadExpr(varName, var.type, parcelName)
 
-def getWriteExpr(varName, varType, parcelName):
+def getWriteExpr(varName, var, parcelName):
     '''
     Creates a parcel serialization expression with given variable name and parcel name
     '''
     
-    if varType.isPrimitive:
-        if varType == Type.BOOL:
-            return parcelName + '->writeInt32(' + varName + ' ? 1 : 0)'
+    if isinstance(var, Type):
+        if var.isPrimitive:
+            if var == Type.BOOL:
+                return parcelName + '->writeInt32(' + varName + ' ? 1 : 0)'
+            
+            elif var == Type.INT32:
+                return parcelName + '->writeInt32(' + varName + ')'
+            
+            elif var == Type.INT64:
+                return parcelName + '->writeInt64(' + varName + ')'
+            
+            elif var == Type.FLOAT32:
+                return parcelName + '->writeFloat(' + varName + ')'
+            
+            elif var == Type.FLOAT64:
+                return parcelName + '->writeDouble(' + varName + ')'
+            
+            elif var == Type.STRING:
+                return parcelName + '->writeString16(' + varName + ')'
+            
+            else:
+                return '#error Deserialization of type ' + var.name + ' not implemented' 
+            
+        elif var == Type.ENUM:
+            return parcelName + '->writeInt32(static_cast<int>(' + varName + ' ))'
         
-        elif varType == Type.INT32:
-            return parcelName + '->writeInt32(' + varName + ')'
+        elif var == Type.STRUCTURE:
+            return 'if (' + varName + '.get() == NULL ) { ' + parcelName + '->writeInt32(0); } else { ' + varName + '->writeToParcel(' + parcelName + '); }'
         
-        elif varType == Type.INT64:
-            return parcelName + '->writeInt64(' + varName + ')'
-        
-        elif varType == Type.FLOAT32:
-            return parcelName + '->writeFloat(' + varName + ')'
-        
-        elif varType == Type.FLOAT64:
-            return parcelName + '->writeDouble(' + varName + ')'
-        
-        elif varType == Type.STRING:
-            return parcelName + '->writeString16(' + varName + ')'
+        elif var == Type.INTERFACE:
+            return 'if ( ' + varName + '== NULL) {'  + parcelName + '->writeStrongBinder(NULL); } else { ' + parcelName + '->writeStrongBinder(' + varName + '->asBinder()); }' 
         
         else:
-            return '#error Deserialization of type ' + varType.name + ' not implemented' 
-        
-    elif varType == Type.ENUM:
-        return parcelName + '->writeInt32(static_cast<int>(' + varName + ' ))'
-    
-    elif varType == Type.STRUCTURE:
-        return 'if (' + varName + '.get() == NULL ) { ' + parcelName + '->writeInt32(0); } else { ' + varName + '->writeToParcel(' + parcelName + '); }'
-    
-    elif varType == Type.INTERFACE:
-        return 'if ( ' + varName + '== NULL) {'  + parcelName + '->writeStrongBinder(NULL); } else { ' + parcelName + '->writeStrongBinder(' + varName + '->asBinder()); }' 
-    
+            return '#error Deserialization of type ' + var.name + ' not implemented'
     else:
-        return '#error Deserialization of type ' + varType.name + ' not implemented'
+        if var.isArray:
+            # TODO
+            return ''
+        
+        else:
+            return getWriteExpr(varName, var.type, parcelName)
     
 def getIncludePath(idlType, name=None):
     path = idlType.module.package.path
