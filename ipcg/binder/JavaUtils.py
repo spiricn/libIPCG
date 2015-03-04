@@ -1,68 +1,8 @@
 from idl.Type import Type
 
-def getDefaultValue(var):
-    '''
-    Gets a default value for given type (i.e. the value a variable should be initialized to).
-    '''
-    
-    if isinstance(var, Type):
-        valueMap = {
-            Type.VOID : '',
-            Type.BOOL : 'false',
-            Type.FLOAT32 : '-1.0f',
-            Type.STRING : '""',
-            Type.INT32 : '-1',
-            Type.FLOAT64 : '-1.0',
-            Type.INT8 : '-1',
-            Type.INT64 : '-1',
-            Type.ENUM : var.name + '.values()[0]',
-            Type.STRUCTURE : 'new ' + var.name + '()'
-        }
-    
-        if var.id not in valueMap:
-            return 'null'
-        
-        else:
-            return valueMap[var.id]
-    else:
-        if var.isArray:
-            return 'new ArrayList<' + getTypeName(var.type) + '>()'
-        else:
-            return getDefaultValue(var.type)
-    
+from ipcg.lang.Java import getTypeName, getDefaultValue
 
-def getTypeName(var):
-    '''
-    Maps an IDL type ID to Java type string
-    '''
 
-    typeMap = {
-        Type.VOID : 'void',
-        Type.BOOL : 'boolean',
-        Type.FLOAT32 : 'float',
-        Type.STRING : 'String',
-        Type.INT32 : 'int',
-        Type.FLOAT64 : 'double',
-        Type.INT8 : 'byte',
-        Type.INT64 : 'long',
-    }
-    
-    if isinstance(var, Type):
-        if var.isPrimitive:
-            if var.id not in typeMap:
-                raise RuntimeError('Unsupported type %d' % var.id)
-            
-            else:
-                return typeMap[var.id]
-        else:
-            return '.'.join(var.path)
-    else:
-        if var.isArray:
-            return 'List<' + getTypeName(var.type) + '>'
-    
-        else:
-            return getTypeName(var.type)   
-       
 def getReadExpr(varName, var, parcelName):
     '''
     Creates a parcel deserialization expression with given variable name and parcel name
@@ -178,39 +118,6 @@ def getWriteExpr(varName, var, parcelName):
     
         else:
             return getWriteExpr(varName, var.type, parcelName)
-      
-def getMethodArgList(args, isAidl):
-    '''
-    Gets Java or AIDL method argument list string.
-    '''
-    
-    res = ''
-    
-    for index, arg in enumerate(args):
-        if arg.type in [Type.STRUCTURE, Type.INTERFACE,Type.ENUM] and isAidl:
-            res += 'in' if arg.mod(Type.MOD_IN) else 'out' if arg.mod(Type.MOD_OUT) else 'inout'
-            res += ' '
-            
-        res += getTypeName(arg) + ' ' + arg.name
-        
-        if index  != len(args) - 1:
-            res += ', '
-            
-    return res
-
-def getJavaMethodArgList(args):
-    '''
-    Gets Java method argument list string.
-    '''
-    
-    return getMethodArgList(args, isAidl=False)
-
-def getAIDLMethodArgList(args):
-    '''
-    Gets AIDL method argument list string.
-    '''
-    
-    return getMethodArgList(args, isAidl=True)
 
 def formatGetter(field):
     '''

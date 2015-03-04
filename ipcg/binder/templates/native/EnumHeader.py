@@ -1,5 +1,5 @@
 <%!
-import ipcg.binder.LangCPP as Lang
+import ipcg.binder.NativeUtils as Lang
 import ipcg.Utils as Utils
 from idl.Type import Type
 %>

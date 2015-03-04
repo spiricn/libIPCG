@@ -1,5 +1,5 @@
 <%!
-import ipcg.binder.LangJava as Lang
+import ipcg.lang.Java as Lang
 from idl.Type import Type
 %>
 

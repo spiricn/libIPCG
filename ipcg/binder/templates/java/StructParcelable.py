@@ -1,6 +1,7 @@
 <%!
 from idl.Type import Type
-import ipcg.binder.LangJava as Lang
+import ipcg.lang.Java as Lang
+import ipcg.binder.JavaUtils as Utils
 %>
 
 ## Package declaration
@@ -17,7 +18,7 @@ public class ${struct.name} implements Parcelable {
                                                    
     ## Argument constructor
 %if struct.fields:
-    public ${struct.name} (${Lang.getJavaMethodArgList(struct.fields)}) {
+    public ${struct.name} (${Lang.getMethodArgList(struct.fields)}) {
     % for arg in struct.fields:
         this.${arg.name} = ${arg.name};
     %endfor
@@ -38,7 +39,7 @@ public class ${struct.name} implements Parcelable {
     
     ## Field setters
 % for field in struct.fields:
-    public ${struct.name} ${Lang.formatSetter(field)} (${Lang.getTypeName(field)} ${field.name}) {
+    public ${struct.name} ${Utils.formatSetter(field)} (${Lang.getTypeName(field)} ${field.name}) {
         this.${field.name} = ${field.name};
         
         return this;
@@ -47,7 +48,7 @@ public class ${struct.name} implements Parcelable {
 
     ## Field getters
 % for field in struct.fields:
-    public ${Lang.getTypeName(field)} ${Lang.formatGetter(field)} () {
+    public ${Lang.getTypeName(field)} ${Utils.formatGetter(field)} () {
         return this.${field.name};
     }
 %endfor    
@@ -56,14 +57,14 @@ public class ${struct.name} implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
     % for field in struct.fields:
-        ${Lang.getWriteExpr('this.' + field.name, field, 'dest')};
+        ${Utils.getWriteExpr('this.' + field.name, field, 'dest')};
     % endfor
     }
     
     ## Deserialization
     public ${struct.name} readFromParcel(Parcel in) {
     % for field in struct.fields:
-        ${Lang.getReadExpr('this.' + field.name, field, 'in')};
+        ${Utils.getReadExpr('this.' + field.name, field, 'in')};
     % endfor
     
         return this;

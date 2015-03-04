@@ -1,5 +1,5 @@
 <%!
-import ipcg.binder.LangJava as Lang
+import ipcg.lang.AIDL as Lang
 from idl.Type import Type
 %>
 
@@ -17,7 +17,7 @@ interface ${iface.name} {
 % for method in iface.methods:
 
     ## Method declaration
-    ${Lang.getTypeName(method.ret)} ${method.name} ( ${Lang.getAIDLMethodArgList(method.args)} );
+    ${Lang.getTypeName(method.ret)} ${method.name} ( ${Lang.getMethodArgList(method.args)} );
 
 % endfor                         
 } // ${iface.name}
