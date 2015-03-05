@@ -15,7 +15,6 @@ import ${'.'.join(i.module.package.path) + '.' + i.name};
 interface ${iface.name} {
 
 % for method in iface.methods:
-
     ## Method declaration
     ${Lang.getTypeName(method.ret)} ${method.name} ( ${Lang.getMethodArgList(method.args)} );
 

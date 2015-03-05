@@ -16,8 +16,8 @@ def getDefaultValue(var):
             Type.FLOAT64 : '-1.0',
             Type.INT8 : '-1',
             Type.INT64 : '-1',
-            Type.ENUM : var.name + '.values()[0]',
-            Type.STRUCTURE : 'new ' + var.name + '()'
+            Type.ENUM : 'null',
+            Type.STRUCTURE : 'null',
         }
     
         if var.id not in valueMap:

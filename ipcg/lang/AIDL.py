@@ -25,7 +25,7 @@ def getTypeName(var):
             else:
                 return typeMap[var.id]
         else:
-            return '.'.join(var.path)
+            return var.name
     else:
         if var.isArray:
             return 'List<' + getTypeName(var.type) + '>'
@@ -41,11 +41,8 @@ def getMethodArgList(args):
     res = ''
     
     for index, arg in enumerate(args):
-        if arg.type in [Type.STRUCTURE, Type.INTERFACE,Type.ENUM]:
-            res += 'in' if arg.mod(Type.MOD_IN) else 'out' if arg.mod(Type.MOD_OUT) else 'inout'
-            res += ' '
-            
-        res += getTypeName(arg) + ' ' + arg.name
+        # TODO Handle out and inout based on 'arg.mods'
+        res += 'in ' + getTypeName(arg) + ' ' + arg.name
         
         if index  != len(args) - 1:
             res += ', '
