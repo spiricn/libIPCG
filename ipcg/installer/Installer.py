@@ -74,13 +74,18 @@ class Installer:
         buildList = self._readBuildList()
         
         if not buildList:
-            return
+            return 0
+        
+        numDeleted = 0
         
         for i in buildList:
             if os.path.exists(i):
                 FileUtils.delete(i)
+                numDeleted += 1
             
         FileUtils.delete(self._buildListPath)
+        
+        return numDeleted
         
     def _readBuildList(self):
         if os.path.exists(self._buildListPath):        

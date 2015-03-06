@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 from distutils.core import setup
+import ipcg
 
-import idl
 
 setup(
       name = 'libIPCG',
       
-      version = idl.__version__,
+      version = ipcg.__version__,
       
       description = 'IPC generator tool',
       
