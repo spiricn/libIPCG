@@ -1,4 +1,5 @@
 import filecmp
+import fnmatch
 import os
 import shutil
 
@@ -68,3 +69,13 @@ class FileUtils:
     def makeTree(path):
         if not os.path.exists(path):
             os.makedirs(path)
+            
+    @staticmethod
+    def scanDir(path, expr):
+        filteredFiles = []
+        
+        for root, dirs, files in os.walk(path):
+            for fileName in fnmatch.filter(files, expr):
+                filteredFiles.append( os.path.abspath(os.path.join(root, fileName)) )
+                                 
+        return filteredFiles
