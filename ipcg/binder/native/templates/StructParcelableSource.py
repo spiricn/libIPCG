@@ -1,6 +1,8 @@
 <%!
 from idl.Type import Type
-import ipcg.binder.NativeUtils as Lang
+import ipcg.binder.native.NativeUtils as Lang
+import ipcg.binder.native.NativeParcelSerialization as NativeParcelSerialization
+import ipcg.binder.native.NativeParcelDeserialization as NativeParcelDeserialization
 %>
 
 #include "${Lang.getIncludePath(struct)}"
@@ -59,7 +61,7 @@ sp<${struct.name}> ${struct.name}::readFromParcel(const Parcel& data){
     ${struct.name}* res = new ${struct.name};
     
 % for field in struct.fields:
-    ${Lang.getReadExpr('res->' + field.name, field, 'data')};
+    ${NativeParcelDeserialization.getReadExpr('res->' + field.name, field, 'data')};
 % endfor
 
     return res;
@@ -71,7 +73,7 @@ status_t ${struct.name}::writeToParcel(Parcel* data) const{
     data->writeInt32(1);
     
 % for field in struct.fields:
-    ${Lang.getWriteExpr('this->' + field.name, field, 'data')};
+    ${NativeParcelSerialization.getWriteExpr('this->' + field.name, field, 'data')};
 % endfor
     
     return NO_ERROR;

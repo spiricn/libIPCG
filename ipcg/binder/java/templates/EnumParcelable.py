@@ -32,7 +32,7 @@ public enum ${enum.name} implements Parcelable {
         return mValue;
     }
     
-    static ${enum.name} getFromValue(int value){
+    public static ${enum.name} getFromValue(int value){
         for( ${enum.name} i : values()){
             if(i.getValue() == value){
                 return i;
@@ -49,16 +49,16 @@ public enum ${enum.name} implements Parcelable {
     
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(ordinal());
+        dest.writeInt(getValue());
     }
     
     public ${enum.name} readFromParcel(Parcel in) {
-        return values()[in.readInt()];
+        return ${enum.name}.getFromValue(in.readInt());
     }
      
     public static final Parcelable.Creator<${enum.name}> CREATOR = new Parcelable.Creator<${enum.name}>() {
         public ${enum.name} createFromParcel(Parcel in) {
-            return ${enum.name}.values()[in.readInt()];
+            return ${enum.name}.getFromValue(in.readInt());
         }
 
         public ${enum.name}[] newArray(int size) {

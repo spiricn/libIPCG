@@ -8,18 +8,25 @@ class JavaGenerator(AGenerator):
     Class used to generate Java binder IPC code.
     '''
     
+    TEMPLATES_DIR = 'java/templates'
+    
     def __init__(self):
-        AGenerator.__init__(self)
+        AGenerator.__init__(self, JavaGenerator.TEMPLATES_DIR)
+
+        # Template used to generate structure java parcelable files        
+        self._structParcelable = self._getTemplate('StructParcelable.py')
         
-        self._structParcelable = self._getTemplate('java/StructParcelable.py')
+        # Template used to generate enumeration java parcelable files
+        self._enumParcelable = self._getTemplate('EnumParcelable.py')
         
-        self._enumParcelable = self._getTemplate('java/EnumParcelable.py')
+        # Template used to generate AIDL interface files
+        self._interfaceAIDL = self._getTemplate('InterfaceAIDL.py')
         
-        self._interfaceAIDL = self._getTemplate('java/InterfaceAIDL.py')
+        # Template used to generate AIDL parcelable files
+        self._parcelableAIDL = self._getTemplate('ParcelableAIDL.py')
         
-        self._parcelableAIDL = self._getTemplate('java/ParcelableAIDL.py')
-        
-        self._makefile = self._getTemplate('java/Makefile.py')
+        # Template used to generate project Android.mk file
+        self._makefile = self._getTemplate('Makefile.py')
         
     def generateMakefile(self, localModule, sourceFiles, isStatic=True):
         '''

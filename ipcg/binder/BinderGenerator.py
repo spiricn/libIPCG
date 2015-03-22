@@ -1,9 +1,9 @@
 from idl.Environment import Environment
 from idl.Type import Type
-
-from ipcg.binder.JavaGenerator import JavaGenerator
-from ipcg.binder.NativeGenerator import NativeGenerator
 from ipcg.installer.Installer import Installer
+
+from ipcg.binder.java.JavaGenerator import JavaGenerator
+from ipcg.binder.native.NativeGenerator import NativeGenerator
 
 
 class BinderGenerator:

@@ -1,7 +1,9 @@
 <%!
 from idl.Type import Type
 import ipcg.lang.Java as Lang
-import ipcg.binder.JavaUtils as Utils
+import ipcg.binder.Format as Format
+import ipcg.binder.java.JavaParcelSerialization as JavaParcelSerialization
+import ipcg.binder.java.JavaParcelDeserialization as JavaParcelDeserialization
 %>
 
 ## Package declaration
@@ -39,7 +41,7 @@ public class ${struct.name} implements Parcelable {
     
     ## Field setters
 % for field in struct.fields:
-    public ${struct.name} ${Utils.formatSetter(field)} (${Lang.getTypeName(field)} ${field.name}) {
+    public ${struct.name} ${Format.getFieldSetterName(field)} (${Lang.getTypeName(field)} ${field.name}) {
         this.${field.name} = ${field.name};
         
         return this;
@@ -48,7 +50,7 @@ public class ${struct.name} implements Parcelable {
 
     ## Field getters
 % for field in struct.fields:
-    public ${Lang.getTypeName(field)} ${Utils.formatGetter(field)} () {
+    public ${Lang.getTypeName(field)} ${Format.getFieldGetterName(field)} () {
         return this.${field.name};
     }
 %endfor    
@@ -57,14 +59,14 @@ public class ${struct.name} implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
     % for field in struct.fields:
-        ${Utils.getWriteExpr('this.' + field.name, field, 'dest')};
+        ${JavaParcelSerialization.getWriteExpr('this.' + field.name, field, 'dest')};
     % endfor
     }
     
     ## Deserialization
     public ${struct.name} readFromParcel(Parcel in) {
     % for field in struct.fields:
-        ${Utils.getReadExpr('this.' + field.name, field, 'in')};
+        ${JavaParcelDeserialization.getReadExpr('this.' + field.name, field, 'in')};
     % endfor
     
         return this;
@@ -82,7 +84,7 @@ public class ${struct.name} implements Parcelable {
     
     @Override
     public String toString(){
-        String res = "{ ${struct.name}: [";
+        String res = "{ ${struct.name}(" + this.hashCode() + "): [";
         
     % for field in struct.fields:
         

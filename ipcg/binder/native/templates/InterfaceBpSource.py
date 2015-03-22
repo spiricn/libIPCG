@@ -1,6 +1,9 @@
 <%!
-import ipcg.binder.NativeUtils as Lang
+import ipcg.binder.native.NativeUtils as Lang
 from idl.Type import Type
+import ipcg.binder.native.NativeParcelSerialization as NativeParcelSerialization
+import ipcg.binder.native.NativeParcelDeserialization as NativeParcelDeserialization
+
 %>
 
 <%
@@ -46,7 +49,7 @@ public:
         data.writeInterfaceToken( ${iface.name}::getInterfaceDescriptor() );
         
     % for arg in method.args:
-        ${Lang.getWriteExpr(arg.name, arg, '(&data)')};
+        ${NativeParcelSerialization.getWriteExpr(arg.name, arg, '(&data)')};
     % endfor
         
         remote()->transact(${Lang.getMethodId(method)}, data, &reply);
@@ -63,7 +66,7 @@ public:
     % if method.ret.type != Type.VOID:
         ${Lang.getTypeName(method.ret)} __returnValue = ${Lang.getDefaultValue(method.ret)};
         
-        ${Lang.getReadExpr('__returnValue', method.ret, 'reply')};
+        ${NativeParcelDeserialization.getReadExpr('__returnValue', method.ret, 'reply')};
                            
         return __returnValue;
     % endif

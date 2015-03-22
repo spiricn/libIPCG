@@ -1,6 +1,8 @@
 <%!
-import ipcg.binder.NativeUtils as Lang
+import ipcg.binder.native.NativeUtils as Lang
 from idl.Type import Type
+import ipcg.binder.native.NativeParcelSerialization as NativeParcelSerialization
+import ipcg.binder.native.NativeParcelDeserialization as NativeParcelDeserialization
 %>
 
 <%
@@ -49,7 +51,7 @@ status_t ${className}::onTransact(uint32_t code, const android::Parcel& data, an
             // Deserialize arguments
             
         % for arg in method.args:
-            ${Lang.getReadExpr(arg.name, arg, 'data')};
+            ${NativeParcelDeserialization.getReadExpr(arg.name, arg, 'data')};
         % endfor
         
             % if method.ret.type != Type.VOID:
@@ -76,7 +78,7 @@ status_t ${className}::onTransact(uint32_t code, const android::Parcel& data, an
             reply->writeNoException();
             
             % if method.ret.type != Type.VOID:
-            ${Lang.getWriteExpr(methodResult, method.ret, 'reply')};
+            ${NativeParcelSerialization.getWriteExpr(methodResult, method.ret, 'reply')};
             % endif
             
             ALOGD("[call end][${method.name}]");

@@ -1,5 +1,5 @@
 <%!
-import ipcg.binder.NativeUtils as Lang
+import ipcg.binder.native.NativeUtils as Lang
 import ipcg.Utils as Utils
 %>
 

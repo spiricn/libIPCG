@@ -8,26 +8,36 @@ class NativeGenerator(AGenerator):
     Class used to generate native binder IPC code.
     '''
     
+    TEMPLATES_DIR = 'native/templates'
+    
     def __init__(self, namespace):
-        AGenerator.__init__(self)
+        AGenerator.__init__(self, NativeGenerator.TEMPLATES_DIR)
         
         self._namespace = namespace
         
-        self._structParcelableHeader = self._getTemplate('native/StructParcelableHeader.py')
+        # Template used to generate structure class parcelable header files
+        self._structParcelableHeader = self._getTemplate('StructParcelableHeader.py')
         
-        self._structParcelableSource = self._getTemplate('native/StructParcelableSource.py')
+        # Template used to generate structure class parcelable source files
+        self._structParcelableSource = self._getTemplate('StructParcelableSource.py')
         
-        self._enumHeader  = self._getTemplate('native/EnumHeader.py')
+        # Template used to generate enumeration header files
+        self._enumHeader  = self._getTemplate('EnumHeader.py')
         
-        self._interfaceBnHeader = self._getTemplate('native/InterfaceBnHeader.py')
+        # Template used to generate interface native header files
+        self._interfaceBnHeader = self._getTemplate('InterfaceBnHeader.py')
         
-        self._interfaceBnSource = self._getTemplate('native/InterfaceBnSource.py')
+        # Template used to generate interface native source files
+        self._interfaceBnSource = self._getTemplate('InterfaceBnSource.py')
         
-        self._interfaceBpSource = self._getTemplate('native/InterfaceBpSource.py')
+        # Template used to generate interface proxy soruce files
+        self._interfaceBpSource = self._getTemplate('InterfaceBpSource.py')
         
-        self._interfaceHeader = self._getTemplate('native/InterfaceHeader.py')
+        # Template used to generate interface header files
+        self._interfaceHeader = self._getTemplate('InterfaceHeader.py')
         
-        self._makefile = self._getTemplate('native/Makefile.py')
+        # Template used to generate project Android.mk file
+        self._makefile = self._getTemplate('Makefile.py')
         
     def generateMakefile(self, sourceFiles, localModule, isStatic=True):
         '''
