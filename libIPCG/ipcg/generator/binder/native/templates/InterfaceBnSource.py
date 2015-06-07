@@ -39,13 +39,13 @@ status_t ${className}::onTransact(uint32_t code, const android::Parcel& data, an
             
             // Declare method arguments
         % for arg in method.args:
-            ${NativeUtils.getTypeName(arg.type)} ${arg.name} = ${NativeUtils.getDefaultValue(arg)};
+            ${NativeUtils.getTypeClassInstance(arg.type)} ${arg.name} = ${NativeUtils.getDefaultValue(arg)};
         % endfor
             
             // Declare return type
             
             % if method.ret.type != Type.VOID:
-            ${NativeUtils.getTypeClass(method.ret)} ${methodResult} = ${NativeUtils.getDefaultValue(method.ret)};
+            ${NativeUtils.getTypeClassInstance(method.ret)} ${methodResult} = ${NativeUtils.getDefaultValue(method.ret)};
             % endif
             
             // Deserialize arguments

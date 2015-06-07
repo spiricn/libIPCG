@@ -56,7 +56,7 @@ def getWriteExprParcelable(varName, typeObj, parcelName):
         return parcelName + '->writeInt32(static_cast<int>(' + varName + ' ))'
     
     elif typeObj == Type.STRUCTURE:
-        return 'if (' + varName + '.get() == NULL ) { ' + parcelName + '->writeInt32(0); } else { ' + varName + '->writeToParcel(' + parcelName + '); }'
+        return '{ if (' + varName + '.get() == NULL ) { ' + parcelName + '->writeInt32(0); } else { ' + parcelName + '->writeInt32(1); ' +  varName + '->writeToParcel(' + parcelName + '); } }'
     
     elif typeObj == Type.INTERFACE:
         return 'if ( ' + varName + '== NULL) {'  + parcelName + '->writeStrongBinder(NULL); } else { ' + parcelName + '->writeStrongBinder(' + varName + '->asBinder()); }'

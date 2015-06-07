@@ -56,12 +56,6 @@ ${struct.name}::~${struct.name}(){
 
 // Deserialization
 sp<${struct.name}> ${struct.name}::readFromParcel(const Parcel& data){
-    // Check if there is valid data in the parcel
-    if(data.readInt32() == 0){
-        // No data
-        return NULL;
-    }
-    
     ${struct.name}* res = new ${struct.name};
     
 % for field in struct.fields:
@@ -73,9 +67,6 @@ sp<${struct.name}> ${struct.name}::readFromParcel(const Parcel& data){
 
 // Serialization
 status_t ${struct.name}::writeToParcel(Parcel* data) const{
-    // Write 1 to indicate we have valid data in the parcel
-    data->writeInt32(1);
-    
 % for field in struct.fields:
     ${NativeParcelSerialization.getWriteExpr('this->' + field.name, field, 'data')};
 % endfor
@@ -85,7 +76,7 @@ status_t ${struct.name}::writeToParcel(Parcel* data) const{
 
 // Field getters
 % for field in struct.fields:
-${NativeUtils.getTypeName(field)} ${struct.name}::${Format.getFieldGetterName(field)}() const{
+${NativeUtils.getTypeClassInstance(field)} ${struct.name}::${Format.getFieldGetterName(field)}() const{
     return this->${field.name};
 }
 % endfor
@@ -95,7 +86,7 @@ ${NativeUtils.getTypeName(field)} ${struct.name}::${Format.getFieldGetterName(fi
 
 ## Array field setters not supported for now
 % if not field.isArray:
-${struct.name}* ${struct.name}::${Format.getFieldSetterName(field)}(const ${NativeUtils.getTypeName(field)}& value){
+${struct.name}* ${struct.name}::${Format.getFieldSetterName(field)}(const ${NativeUtils.getTypeClassInstance(field)}& value){
     this->${field.name} = value;
     
     return this;

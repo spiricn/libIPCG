@@ -18,7 +18,7 @@ class BinderGenerator:
 
         self._javaLibraryName = javaLibraryName
 
-        self._native = NativeGenerator(namespace='proxy')
+        self._native = NativeGenerator(namespace='proxy', libraryInclude='TODO', libraryName='TODO')
 
         self._env = Environment()
 

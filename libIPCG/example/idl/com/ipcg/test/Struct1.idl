@@ -4,9 +4,6 @@ struct Struct1{
 	// Primitive field
 	string stringField;
 	
-	// Structure field
-	Struct2 structField;
-	
 	// Enum field
 	Enum1 enumField;
 	

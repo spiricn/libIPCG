@@ -1,11 +1,62 @@
 from idl.Type import Type
 
+def nameToDefine(name):
+    return name + '_TODO________'
 
 def getTypeClass(var):
-    return 'TODO'
+    if isinstance(var, Type) and var.isPrimitive:
+        typeMap = {
+            Type.VOID : 'void',
+            Type.BOOL : 'bool',
+            Type.FLOAT32 : 'float',
+            Type.INT32 : 'int32_t',
+            Type.FLOAT64 : 'double',
+            Type.INT8 : 'int8_t',
+            Type.INT64 : 'int64_t',
+            Type.STRING : 'android::String16'
+        }
 
-def nameToDefine(name):
-    return 'TODO'
+        if var.id in typeMap:
+            return typeMap[var.id]
+
+        else:
+            # TODO
+            raise NotImplementedError()
+
+    elif isinstance(var, Type) and var.id in [Type.ENUM, Type.STRUCTURE, Type.INTERFACE]:
+        return '::'.join(var.path)
+
+    elif var.isArray:
+        # TODO
+        raise NotImplementedError()
+
+    else:
+        return getTypeClass(var.type)
+
+def getTypeClassInstance(var):
+    '''
+    Maps an IDL type ID to C++ type string
+    '''
+
+    if isinstance(var, Type) and var.isPrimitive:
+        return getTypeClass(var)
+
+    elif isinstance(var, Type) and var.id in [Type.ENUM, Type.STRUCTURE, Type.INTERFACE]:
+        typeClass = getTypeClass(var)
+
+        if var.id in [Type.STRUCTURE, Type.INTERFACE]:
+            # Use smart pointers only for structures and interfaces
+            return 'android::sp<' + typeClass + '>'
+
+        else:
+            return typeClass
+
+    elif var.isArray:
+        # TODO
+        raise NotImplementedError()
+
+    else:
+        return getTypeClassInstance(var.type)
 
 def getDefaultValue(var):
     '''
@@ -39,48 +90,13 @@ def getDefaultValue(var):
 
     else:
         if var.isArray:
-            return 'new android::Vector< ' + getTypeName(var.type) + ' >()'
+            # TODO
+            raise NotImplementedError()
 
         else:
             return getDefaultValue(var.type)
 
-def getTypeName(var):
-    '''
-    Maps an IDL type ID to C++ type string
-    '''
 
-    if isinstance(var, Type) and var.isPrimitive:
-        typeMap = {
-            Type.VOID : 'void',
-            Type.BOOL : 'bool',
-            Type.FLOAT32 : 'float',
-            Type.INT32 : 'int32_t',
-            Type.FLOAT64 : 'double',
-            Type.INT8 : 'int8_t',
-            Type.INT64 : 'int64_t',
-            Type.STRING : 'android::String16'
-        }
-
-        if var.id in typeMap:
-            return typeMap[var.id]
-
-        else:
-            raise NotImplementedError('Type %r not supported' % var.name)
-
-    elif isinstance(var, Type) and var.id in [Type.ENUM, Type.STRUCTURE, Type.INTERFACE]:
-        typeClass = '::'.join(var.path)
-
-        if var.id in [Type.STRUCTURE, Type.INTERFACE]:
-            return 'android::sp<' + typeClass + '>'
-
-        else:
-            return typeClass
-
-    elif var.isArray:
-        return 'android::Vector< ' + getTypeName(var.type) + ' >*'
-
-    else:
-        return getTypeName(var.type)
 
 def getArgList(args):
     '''
@@ -90,7 +106,7 @@ def getArgList(args):
     res = ''
 
     for index, arg in enumerate(args):
-        res += getTypeName(arg.type) + ' ' + arg.name
+        res += getTypeClassInstance(arg.type) + ' ' + arg.name
 
         if index != len(args) - 1:
             res += ', '
@@ -102,7 +118,7 @@ def getMethodSig(method):
     Gets a method signature string (i.e. returnType + name + argList)
     '''
 
-    return getTypeName(method.ret.type) + ' ' + method.name + '(' + getArgList(method.args) + ')'
+    return getTypeClassInstance(method.ret.type) + ' ' + method.name + '(' + getArgList(method.args) + ')'
 
 def getMethodId(method):
     '''

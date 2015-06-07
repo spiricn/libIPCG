@@ -66,7 +66,7 @@ public:
         }
         
     % if method.ret.type != Type.VOID:
-        ${NativeUtils.getTypeName(method.ret)} __returnValue = ${NativeUtils.getDefaultValue(method.ret)};
+        ${NativeUtils.getTypeClassInstance(method.ret)} __returnValue = ${NativeUtils.getDefaultValue(method.ret)};
         
         ${NativeParcelDeserialization.getReadExpr('__returnValue', method.ret, 'reply')};
                            

@@ -1,4 +1,5 @@
 import os
+import sys
 
 from ipcg.generator.binder.BinderGenerator import BinderGenerator
 
@@ -6,12 +7,15 @@ def exampleMain():
     # Current directory
     exampleDirectory = os.path.dirname(__file__)
 
-    # Generator output directory
-    outDirectory = os.path.join(exampleDirectory, 'out')
+    if len(sys.argv) > 1:
+        outDirectory = sys.argv[1]
+    else:
+        # Generator output directory
+        outDirectory = os.path.join(exampleDirectory, 'out')
 
     nativeLibraryName = 'libIPCGExampleNative'
 
-    javaLibraryName = 'libIPCGExapleJava'
+    javaLibraryName = 'libIPCGExampleJava'
 
     nativeProjectDirectory = os.path.join(outDirectory, nativeLibraryName)
 

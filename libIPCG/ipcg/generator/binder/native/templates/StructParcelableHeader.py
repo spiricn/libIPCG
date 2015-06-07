@@ -39,22 +39,18 @@ public:
     
     // Field getters
 % for field in struct.fields:
-    ${NativeUtils.getTypeName(field)} ${Format.getFieldGetterName(field)}() const;
+    ${NativeUtils.getTypeClassInstance(field)} ${Format.getFieldGetterName(field)}() const;
 % endfor
     
     // Field setters
 % for field in struct.fields:
-    ${struct.name}* ${Format.getFieldSetterName(field)}(const ${NativeUtils.getTypeName(field)}& value);
+    ${struct.name}* ${Format.getFieldSetterName(field)}(const ${NativeUtils.getTypeClassInstance(field)}& value);
 % endfor
-
-    bool operator==(const ${NativeUtils.getTypeClass(struct)}& other) const;
-    
-    bool operator!=(const ${NativeUtils.getTypeClass(struct)}& other) const;
 
 private:
     // Member fields
 % for field in struct.fields:
-    ${NativeUtils.getTypeName(field)} ${field.name};
+    ${NativeUtils.getTypeClassInstance(field)} ${field.name};
 % endfor
     
 private:

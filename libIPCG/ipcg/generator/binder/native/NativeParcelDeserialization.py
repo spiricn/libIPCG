@@ -1,8 +1,8 @@
 from idl.Type import Type
 from idl.Variable import Variable
 
-from ipcg.generator.binder.native.NativeUtils import getTypeName, \
-    getDefaultValue
+from ipcg.generator.binder.native.NativeUtils import \
+    getDefaultValue, getTypeClassInstance, getTypeClass
 
 
 def getReadExpr(varName, var, parcelName):
@@ -73,10 +73,10 @@ def getReadExprParcelable(varName, typeObj, parcelName):
     '''
 
     if typeObj == Type.ENUM:
-        return varName + ' = static_cast<' + getTypeName(typeObj) + '>(' + parcelName + '.readInt32())'
+        return varName + ' = static_cast<' + getTypeClassInstance(typeObj) + '>(' + parcelName + '.readInt32())'
 
     elif typeObj == Type.STRUCTURE:
-        return varName + ' = ' + getTypeName(typeObj) + '::readFromParcel(' + parcelName + ')'
+        return '{ if(' + parcelName + '.readInt32() == 0){ ' + varName + ' = NULL; } else { ' + varName + ' = ' + getTypeClass(typeObj) + '::readFromParcel(' + parcelName + ');' + '} }'
 
     elif typeObj == Type.INTERFACE:
         res = ''
@@ -110,7 +110,7 @@ def getReadExprArray(varName, var, parcelName):
 
     res += 'for(int i=0; i<__arraySize; i++){' + '\n'
 
-    res += getTypeName(var.type) + ' __tmpElem = ' + getDefaultValue(var.type) + ';\n'
+    res += getTypeClassInstance(var.type) + ' __tmpElem = ' + getDefaultValue(var.type) + ';\n'
 
     res += getReadExpr('__tmpElem', var.type, parcelName) + ';\n'
 

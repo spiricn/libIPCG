@@ -12,10 +12,14 @@ class NativeGenerator(AGenerator):
 
     TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 
-    def __init__(self, namespace):
+    def __init__(self, namespace, libraryInclude, libraryName):
         AGenerator.__init__(self, NativeGenerator.TEMPLATES_DIR)
 
         self._namespace = namespace
+
+        self._libraryInclude = libraryInclude
+
+        self._libraryName = libraryName
 
         # Template used to generate structure class parcelable header files
         self._structParcelableHeader = self._getTemplate('StructParcelableHeader.py')
@@ -52,7 +56,7 @@ class NativeGenerator(AGenerator):
         @return: Source code string.
         '''
 
-        return self._makefile.render(sourceFiles=sourceFiles, localModule=localModule, isStatic=isStatic)
+        return self._makefile.render(sourceFiles=sourceFiles, localModule=localModule, isStatic=isStatic, libraryInclude=self._libraryInclude, libraryName=self._libraryName)
 
     def generateInterfaceBpSource(self, itype):
         '''

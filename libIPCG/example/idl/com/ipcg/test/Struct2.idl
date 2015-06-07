@@ -1,4 +1,5 @@
 package com.ipcg.test;
 
 struct Struct2{
+	Struct1 test;
 };
