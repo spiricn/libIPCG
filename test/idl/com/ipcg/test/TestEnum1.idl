@@ -1,7 +1,0 @@
-package com.ipcg.test;
-
-enum TestEnum1 {
-	VALUE1(5),
-	VALUE2(8),
-	VALUE3(9),
-};

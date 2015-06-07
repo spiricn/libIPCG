@@ -1,0 +1,4 @@
+package com.ipcg.test;
+
+struct Struct2{
+};
