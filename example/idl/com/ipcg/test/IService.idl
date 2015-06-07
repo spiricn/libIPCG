@@ -1,5 +1,0 @@
-package com.ipcg.test;
-
-interface IService{
-	ITestInterface getTestInterface();
-};
