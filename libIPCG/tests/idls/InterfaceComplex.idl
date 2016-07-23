@@ -1,0 +1,24 @@
+package com.ipcg.test;
+
+interface TestInterface{
+    int32 test1(float32 arg1, int64 arg2, string arg3, bool8 arg4);
+    
+    TestStruct test2(TestStruct arg1);
+    
+    TestEnum test3(TestEnum arg1);
+    
+    TestInterface2 test4(TestInterface2 arg1);
+};
+
+interface TestInterface2{
+    int32 test1(float32 arg1);
+};
+
+enum TestEnum {
+    FIELD1,
+    FIELD2
+};
+
+struct TestStruct {
+    int32 field1;
+};

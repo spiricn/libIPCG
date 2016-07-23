@@ -1,0 +1,9 @@
+package com.ipcg.test;
+
+struct TestStruct {
+    int32 field1;
+    float32 field2;
+    int64 field3;
+    string field4;
+    bool8 field5;
+};

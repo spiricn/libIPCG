@@ -1,0 +1,17 @@
+package com.ipcg.test;
+
+struct TestStruct {
+    int32[] field1;
+    string[] field2;
+    TestEnum[] field3;
+    TestStruct2[] field4;
+};
+
+enum TestEnum {
+    FIELD1,
+    FIELD2
+};
+
+struct TestStruct2{
+    int32 field1;
+};

@@ -1,0 +1,6 @@
+package com.ipcg.test;
+
+interface TestInterface {
+    // Primitive return/args
+    int32 test1(float32 arg1, int64 arg2, string arg3, bool8 arg4);
+};

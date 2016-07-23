@@ -1,0 +1,8 @@
+package com.ipcg.test;
+
+enum TestEnum {
+    FIELD1,
+    FIELD2,
+    FIELD3,
+    FIELD4
+};
