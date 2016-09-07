@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
 from distutils.core import setup
-from ipcg import tmp
+import ipcg
 
 
 setup(
       name = 'libIPCG',
-      
-      version = ipcg.tmp.__version__,
       
       description = 'IPC generator tool',
       
@@ -15,7 +13,7 @@ setup(
       
       author_email = 'nikola.spiric.ns@gmail.com',
       
-      package_dir = {'tmp' : 'tmp'},
+      package_dir = {'ipcg' : 'ipcg'},
       
-      packages = ['tmp', 'tmp.binder', 'tmp.lang', 'tmp.installer'],
+      packages = ['ipcg', 'ipcg.generator', 'ipcg.utils', 'ipcg.installer'],
 )
