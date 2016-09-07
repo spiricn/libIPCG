@@ -8,7 +8,7 @@ def getTypeName(var):
 
     typeMap = {
         Type.VOID : 'void',
-        Type.BOOL : 'boolean',
+        Type.BOOL8 : 'boolean',
         Type.FLOAT32 : 'float',
         Type.STRING : 'String',
         Type.INT32 : 'int',

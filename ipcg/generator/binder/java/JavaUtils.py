@@ -9,7 +9,7 @@ def getDefaultValue(var):
     if isinstance(var, Type):
         valueMap = {
             Type.VOID : '',
-            Type.BOOL : 'false',
+            Type.BOOL8 : 'false',
             Type.FLOAT32 : '-1.0f',
             Type.STRING : '""',
             Type.INT32 : '-1',
@@ -42,7 +42,7 @@ def getTypeName(var):
 
     typeMap = {
         Type.VOID : 'void',
-        Type.BOOL : 'boolean',
+        Type.BOOL8 : 'boolean',
         Type.FLOAT32 : 'float',
         Type.STRING : 'String',
         Type.INT32 : 'int',

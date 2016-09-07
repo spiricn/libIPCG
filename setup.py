@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
 import ipcg
+
+
+from setuptools import setup, find_packages
 
 
 setup(
@@ -15,5 +17,5 @@ setup(
       
       package_dir = {'ipcg' : 'ipcg'},
       
-      packages = ['ipcg', 'ipcg.generator', 'ipcg.utils', 'ipcg.installer'],
+      packages=find_packages(),
 )
