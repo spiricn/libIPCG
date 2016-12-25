@@ -42,7 +42,7 @@ def getReadExprPrimitive(varName, typeObj, parcelName):
     @param parcelName: Name of the parcel variable
     '''
 
-    if typeObj == Type.BOOL:
+    if typeObj == Type.BOOL8:
         return varName + ' = ' + parcelName + '.readInt32() ? true : false'
 
     elif typeObj == Type.INT32:

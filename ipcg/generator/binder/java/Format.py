@@ -10,7 +10,7 @@ def getFieldGetterName(field):
     
     prefix = 'get'
     
-    if field.type == Type.BOOL:
+    if field.type == Type.BOOL8:
         prefix = 'is'
         
     return prefix + field.name[0].upper() + field.name[1:]

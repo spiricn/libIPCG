@@ -30,7 +30,7 @@ def getWriteExpr(varName, var, parcelName):
         raise NotImplementedError('Serialization of type %r not yet implemented', var.name)
     
 def getWriteExprPrimitive(varName, typeObj, parcelName):
-    if typeObj == Type.BOOL:
+    if typeObj == Type.BOOL8:
         return parcelName + '->writeInt32(' + varName + ' ? 1 : 0)'
     
     elif typeObj == Type.INT32:

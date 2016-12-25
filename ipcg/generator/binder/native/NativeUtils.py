@@ -7,7 +7,7 @@ def getTypeClass(var):
     if isinstance(var, Type) and var.isPrimitive:
         typeMap = {
             Type.VOID : 'void',
-            Type.BOOL : 'bool',
+            Type.BOOL8 : 'bool',
             Type.FLOAT32 : 'float',
             Type.INT32 : 'int32_t',
             Type.FLOAT64 : 'double',
@@ -68,7 +68,7 @@ def getDefaultValue(var):
             # Primitive values
             return {
                 Type.VOID : '',
-                Type.BOOL : 'false',
+                Type.BOOL8 : 'false',
                 Type.FLOAT32 : '-1.0f',
                 Type.STRING : 'android::String16("")',
                 Type.INT32 : '-1',

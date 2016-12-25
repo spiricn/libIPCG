@@ -42,7 +42,7 @@ def getWriteExprPrimitive(varName, typeObj, parcelName):
     @param parcelName: Name of the parcel variable
     '''
     
-    if typeObj == Type.BOOL:
+    if typeObj == Type.BOOL8:
         return parcelName + '.writeInt(' + varName + ' ? 1 : 0)'
     
     elif typeObj == Type.INT32:
